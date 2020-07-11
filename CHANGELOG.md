@@ -8,3 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Documentation files: README.md; LICENSE.txt; CONTRIBUTING.md; CODEOFCONDUCT.md; and, CHANGELOG.md.
 - Database connection and session management for SQLite and PostgreSQL databases.
+
+### Fixed
+- Resolve SQLite single thread warning by turning off 'same thread check'.

@@ -21,14 +21,17 @@ class Connection(metaclass=ABCMeta):
     Attributes:
     - engine Engine -- a connection to the database.
     """
-    def __init__(self) -> None:
-        """Establishes a connection to the database."""
-        self.engine = create_engine(self.get_url())
+    def __init__(self, connect_args: Dict = {}) -> None:
+        """Establishes a connection to the database.
+
+        Arguments:
+        - connect_args Dict -- connection options for the database.
+        """
+        self.engine = create_engine(self.get_url(), connect_args=connect_args)
 
     @abstractmethod
     def get_url(self) -> str:
         """Returns the URL to for the database."""
-        pass
 
 class PostgresConnection(Connection):
     """Connection to a PostgreSQL database.
@@ -79,7 +82,7 @@ class SqliteConnection(Connection):
         """
         self.path = path
 
-        super().__init__()
+        super().__init__({"check_same_thread": False})
 
     def get_url(self) -> str:
         """Returns the URL to for the database."""
