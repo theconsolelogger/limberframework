@@ -1,30 +1,19 @@
+from unittest.mock import MagicMock
 from sqlalchemy.orm import Session, sessionmaker
 from limberframework.config.config_service_provider import ConfigServiceProvider
 from limberframework.database.connections import SqliteConnection
 from limberframework.database.database_service_provider import DatabaseServiceProvider
 
 def test_database_service_provider():
-    config = {
-        'driver': 'sqlite',
-        'path': './sqlite.db'
-    }
+    mock_app = MagicMock()
+    database = DatabaseServiceProvider(mock_app)
+    database.register()
 
-    database_service_provider = DatabaseServiceProvider(config)
-
-    assert isinstance(database_service_provider.database, SqliteConnection)
-    assert isinstance(database_service_provider.session, sessionmaker)
-    assert isinstance(database_service_provider.session(), Session)
+    assert mock_app.bind.call_count == 2
 
 def test_config_service_provider():
-    config = {
-        'database': {
-            'driver': 'sqlite',
-            'path': './sqlite.db'
-        }
-    }
+    mock_app = MagicMock()
+    config = ConfigServiceProvider(mock_app)
+    config.register()
 
-    config_service_provider = ConfigServiceProvider(config)
-
-    assert isinstance(config_service_provider, ConfigServiceProvider)
-    assert config_service_provider.configs is config
-    assert config_service_provider is ConfigServiceProvider(config)
+    assert mock_app.bind.called_once()
