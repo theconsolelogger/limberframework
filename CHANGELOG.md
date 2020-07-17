@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Application class to act as a service container that manages available services.
 - Config class to manage application configuration.
 - DatabaseSessionMiddleware to automatically establish a database session when a request is received.
+- Model class for providing a base class for SQLAlchemy declarative classes with convenience methods.
 
 ### Fixed
 - Resolve SQLite single thread warning by turning off 'same thread check'.
