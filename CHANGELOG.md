@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DatabaseSessionMiddleware to automatically establish a database session when a request is received.
 - Model class for providing a base class for SQLAlchemy declarative classes with convenience methods.
 - Add methods to add, update, and delete Model classes.
+- Soft delete property to Model class to remove Models without deleting from the database.
 
 ### Fixed
 - Resolve SQLite single thread warning by turning off 'same thread check'.

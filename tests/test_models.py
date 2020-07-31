@@ -2,6 +2,10 @@ from unittest.mock import Mock
 from pytest import fixture
 from limberframework.database.models import Model
 
+@fixture(autouse=True)
+def reset_model_class():
+    Model.soft_delete = False
+
 @fixture
 def model():
     return Model()
@@ -13,6 +17,37 @@ def session():
 def test_create_model(model):
     assert model.soft_delete == False
     assert model.__tablename__ == 'model'
+
+def test_check_soft_deletes_true():
+    mock_query = Mock()
+
+    Model.soft_delete = True
+    model = Model()
+    model.check_soft_deletes(mock_query)
+
+    mock_query.filter_by.assert_called_with(deleted_at=None)
+
+def test_check_soft_deletes_false(model):
+    mock_query = Mock()
+
+    model.check_soft_deletes(mock_query)
+
+    mock_query.filter_by.assert_not_called()
+
+def test_all_without_soft_delete(model, session):
+    model.all(session)
+
+    session.query.assert_called_with(Model)
+    session.query.return_value.all.assert_called_once()
+
+def test_all_with_soft_delete(session):
+    Model.soft_delete = True
+    model = Model()
+    model.all(session)
+
+    session.query.assert_called_with(Model)
+    session.query.return_value.filter_by.assert_called_with(deleted_at=None)
+    session.query.return_value.all.assert_called_once()
 
 def test_first(model, session):
     model.first(session)
@@ -64,8 +99,18 @@ def test_update(model):
     for attribute, value in attributes.items():
         assert getattr(model, attribute) == value
 
-def test_destroy(model, session):
+def test_destroy_without_soft_delete(model, session):
     response = model.destroy(session)
 
     assert response == None
     session.delete.assert_called_with(model)
+
+def test_destroy_with_soft_delete(model, session):
+    Model.soft_delete = True
+    model = Model()
+    model.update = Mock()
+
+    model.destroy(session)
+
+    model.update.assert_called_once()
+    session.delete.assert_not_called()

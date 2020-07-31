@@ -3,15 +3,18 @@
 Classes:
 - Model: base class for declarative class definitions.
 """
+from datetime import datetime
 from typing import Any, Dict, List
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.query import Query
 
 @as_declarative()
 class Model:
     """Base class for declarative class definitions."""
     id: Any
     __name__: str
+    soft_delete: bool = False
 
     @declared_attr
     def __tablename__(cls) -> str:
@@ -19,6 +22,21 @@ class Model:
         the class name in lowercase.
         """
         return cls.__name__.lower()
+
+    @classmethod
+    def check_soft_deletes(cls, query: Query) -> Query:
+        """Adds filter for deleted_at column
+        if Model is set as soft deletes.
+
+        Arguments:
+        query Query -- query to add filter.
+
+        Returns:
+        Query -- with or without deleted_at filter.
+        """
+        if cls.soft_delete:
+            query.filter_by(deleted_at=None)
+        return query
 
     @classmethod
     def all(cls, database: Session) -> List[Dict]:
@@ -30,7 +48,7 @@ class Model:
         Returns:
         list -- list of records.
         """
-        return database.query(cls).all()
+        return cls.check_soft_deletes(database.query(cls)).all()
 
     @classmethod
     def first(cls, database: Session) -> Dict:
@@ -42,7 +60,7 @@ class Model:
         Returns:
         dict -- dict containing the first record.
         """
-        return database.query(cls).first()
+        return cls.check_soft_deletes(database.query(cls)).first()
 
     @classmethod
     def get(cls, database: Session, id: int) -> Dict:
@@ -56,7 +74,7 @@ class Model:
         Returns:
         dict -- dict containing the first record.
         """
-        return database.query(cls).get(id)
+        return cls.check_soft_deletes(database.query(cls)).get(id)
 
     @classmethod
     def filter(cls, database: Session, **kwargs) -> List:
@@ -70,7 +88,7 @@ class Model:
         Returns:
         list -- list of records.
         """
-        return database.query(cls).filter_by(**kwargs).all()
+        return cls.check_soft_deletes(database.query(cls)).filter_by(**kwargs).all()
 
     @classmethod
     def create(cls, session: Session, attributes: Dict, **kwargs) -> 'Model':
@@ -79,7 +97,7 @@ class Model:
         Arguments:
         database Session -- Session object.
         attributes Dict -- attributes to set on the model.
-        
+
         Returns:
         Model -- a new instance of Model with stated attributes.
         """
@@ -117,4 +135,7 @@ class Model:
         Arguments:
         session Session -- Session object to remove the model from.
         """
-        session.delete(self)
+        if self.soft_delete:
+            self.update({'deleted_at': datetime.now()})
+        else:
+            session.delete(self)
