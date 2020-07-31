@@ -16,6 +16,7 @@ class DatabaseSessionMiddleware(BaseHTTPMiddleware):
         try:
             request.state.db = request.app['db.session']
             response = await call_next(request)
+            request.state.db.commit()
         finally:
             request.state.db.close()
         return response
