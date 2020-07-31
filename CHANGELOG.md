@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Model class for providing a base class for SQLAlchemy declarative classes with convenience methods.
 - Add methods to add, update, and delete Model classes.
 - Soft delete property to Model class to remove Models without deleting from the database.
+- Tests for config/config module.
 
 ### Fixed
 - Resolve SQLite single thread warning by turning off 'same thread check'.
