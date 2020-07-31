@@ -71,3 +71,50 @@ class Model:
         list -- list of records.
         """
         return database.query(cls).filter_by(**kwargs).all()
+
+    @classmethod
+    def create(cls, session: Session, attributes: Dict, **kwargs) -> 'Model':
+        """Creates a new instance of the model and adds to a database session.
+
+        Arguments:
+        database Session -- Session object.
+        attributes Dict -- attributes to set on the model.
+        
+        Returns:
+        Model -- a new instance of Model with stated attributes.
+        """
+        model_object = cls(**attributes, **kwargs)
+        return model_object.save(session)
+
+    def save(self, session: Session) -> 'Model':
+        """Adds a Model to a database session.
+
+        Arguments:
+        session Session -- Session object to add model too.
+
+        Returns:
+        Model -- the current Model instance.
+        """
+        session.add(self)
+        return self
+
+    def update(self, attributes: Dict) -> 'Model':
+        """Changes the attributes of the Model.
+
+        Arguments:
+        attributes Dict -- attributes to change with values.
+
+        Returns:
+        Model -- the current Model instance.
+        """
+        for attribute, value in attributes.items():
+            setattr(self, attribute, value)
+        return self
+
+    def destroy(self, session: Session) -> None:
+        """Removes the Model in a database session.
+
+        Arguments:
+        session Session -- Session object to remove the model from.
+        """
+        session.delete(self)
