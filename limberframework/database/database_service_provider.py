@@ -37,7 +37,6 @@ class DatabaseServiceProvider(ServiceProvider):
             Returns:
             Session object
             """
-            return sessionmaker(autocommit=False, autoflush=False,
-                                bind=app['db.connection'].engine)()
+            return sessionmaker(bind=app['db.connection'].engine)()
 
         self.app.bind('db.session', register_database_session)

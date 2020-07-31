@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - DatabaseServiceProvider to implement required methods by ServiceProvider for registering services with with the Application class.
 - ConfigServiceProvider to implement required methods by ServiceProvider for registering services with the Application class.
+- Database session to autocommit and autoflush.
 
 ### Removed
 - Singleton metaclass as singletons are now handled by the Application class.
