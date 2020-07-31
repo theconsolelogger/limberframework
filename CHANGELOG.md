@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add methods to add, update, and delete Model classes.
 - Soft delete property to Model class to remove Models without deleting from the database.
 - Tests for config/config module.
+- Test for creating a PostgresConnection instance.
 
 ### Fixed
 - Resolve SQLite single thread warning by turning off 'same thread check'.

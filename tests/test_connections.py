@@ -96,3 +96,17 @@ def test_make_connection_with_invalid_driver():
         make_connection(config)
 
     assert f"Unsupported driver {config['driver']}" in str(exception.value)
+
+def test_make_connection_pgsql():
+    config = {
+        'driver': 'pgsql',
+        'username': 'test',
+        'password': 'test',
+        'host': 'test',
+        'port': 5432,
+        'database': 'test'
+    }
+
+    response = make_connection(config)
+
+    assert isinstance(response, PostgresConnection)
