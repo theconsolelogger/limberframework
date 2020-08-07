@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - FileSystem class to handle reading and writing files on the file system.
 - Cache services, including FileStore to cache data in files and the Cache class to interact with the cache.
 - Base path attribute to Application class used to work out the location of the app.
+- Rate limiting features, including RateLimiter class and ThrottleRequests middleware.
 
 ### Fixed
 - Resolve SQLite single thread warning by turning off 'same thread check'.
