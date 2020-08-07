@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tests for config/config module.
 - Test for creating a PostgresConnection instance.
 - Authentication service provider along with HTTP Basic and API Key authenticators.
+- Hasher class to handle hashing values.
 
 ### Fixed
 - Resolve SQLite single thread warning by turning off 'same thread check'.
