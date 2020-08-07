@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Resolve SQLite single thread warning by turning off 'same thread check'.
+- Authenticator factory function now accepts a dictionary containing configurations for an authenticator.
 
 ### Changed
 - DatabaseServiceProvider to implement required methods by ServiceProvider for registering services with with the Application class.

@@ -148,7 +148,7 @@ class ApiKey(Authenticator):
         self.user_id = user_id
         return user_id
 
-def make_authenticator(driver: str) -> Authenticator:
+def make_authenticator(config: Dict) -> Authenticator:
     """Factory function to establish the authenticator.
 
     Arguments:
@@ -157,12 +157,12 @@ def make_authenticator(driver: str) -> Authenticator:
     Returns:
     Authenticator
     """
-    if driver == 'httpbasic':
+    if config['driver'] == 'httpbasic':
         return HttpBasic()
-    if driver == 'apikey':
+    if config['driver'] == 'apikey':
         return ApiKey()
 
-    raise Exception(f"Unsupported authenticator {driver}.")
+    raise Exception(f"Unsupported authenticator {config['driver']}.")
 
 async def authorise(request: Request) -> Optional[int]:
     """Authorises a request by calling the authorise
