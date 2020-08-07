@@ -3,6 +3,7 @@
 Classes:
 - Application: service container that registers and manages services.
 """
+from os import getcwd
 from typing import Any
 from fastapi import FastAPI
 from limberframework.support.service_providers import ServiceProvider
@@ -16,8 +17,9 @@ class Application(FastAPI):
     bindings dict -- services bound to the service container.
     instances dict -- instances of singleton services.
     """
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, base_path: str = None, *args, **kwargs) -> None:
         """Establishes the service container."""
+        self.base_path = base_path or getcwd()
         self.bindings = {}
         self.instances = {}
 

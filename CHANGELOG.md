@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Authentication service provider along with HTTP Basic and API Key authenticators.
 - Hasher class to handle hashing values.
 - FileSystem class to handle reading and writing files on the file system.
+- Cache services, including FileStore to cache data in files and the Cache class to interact with the cache.
+- Base path attribute to Application class used to work out the location of the app.
 
 ### Fixed
 - Resolve SQLite single thread warning by turning off 'same thread check'.
