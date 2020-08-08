@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ConfigServiceProvider to implement required methods by ServiceProvider for registering services with the Application class.
 - Database session to autocommit and autoflush.
 - Commit session to database after processing the request in the DatabaseSessionMiddleware.
+- Pipenv to poetry for package management and distribution.
 
 ### Removed
 - Singleton metaclass as singletons are now handled by the Application class.
