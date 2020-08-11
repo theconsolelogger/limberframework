@@ -63,6 +63,33 @@ def test_make_known_singleton_service(application):
     assert isinstance(service_2, MagicMock)
     assert service_1 is service_2
 
+def test_load_services(application):
+    mock_closure = Mock()
+    mock_make = Mock()
+
+    application.make = mock_make
+    services = [
+        {
+            'name': 'cache',
+            'closure': mock_closure,
+            'singleton': True,
+            'defer': False
+        },
+        {
+            'name': 'auth',
+            'closure': mock_closure,
+            'singleton': False,
+            'defer': True
+        }
+    ]
+
+    for service in services:
+        application.bind(service['name'], service['closure'], service['singleton'], service['defer'])
+
+    application.load_services()
+
+    application.make.assert_called_once_with(services[0]['name'])
+
 def test_get_item(application):
     name = 'test'
     closure = MagicMock

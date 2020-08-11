@@ -78,6 +78,12 @@ class Application(FastAPI):
         self.instances[name] = self.bindings[name]['closure'](self)
         return self.instances[name]
 
+    def load_services(self) -> None:
+        """Make instances of registered services that are not deferrable."""
+        for service, value in self.bindings.items():
+            if not value['defer']:
+                self.make(service)
+
     def __getitem__(self, name: str) -> Any:
         """Retrieve a service.
 
