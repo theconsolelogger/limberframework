@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - test_make_store_file_store test to pass cache path inside the config dictionary.
 
+### Added
+- deferrable services which will be loaded when needed.
+
 ## [0.1.1] - 2020-08-11
 ### Changed
 - psycopg2-binary package to psycopg2.

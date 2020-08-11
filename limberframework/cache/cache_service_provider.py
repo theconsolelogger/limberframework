@@ -42,4 +42,4 @@ class CacheServiceProvider(ServiceProvider):
             """
             return Cache(app['cache.store'])
 
-        self.app.bind('cache', register_cache)
+        self.app.bind('cache', register_cache, defer=True)

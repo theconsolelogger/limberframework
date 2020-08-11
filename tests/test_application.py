@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 from pytest import fixture, raises
 from limberframework.foundation.application import Application
 
@@ -17,13 +17,15 @@ def test_bind_service(application):
     name = 'test'
     mock_closure = MagicMock()
     singleton = True
+    defer = True
 
-    application.bind(name, mock_closure, singleton)
+    application.bind(name, mock_closure, singleton, defer)
 
     assert application.bindings == {
         name: {
             'closure': mock_closure,
-            'singleton': singleton
+            'singleton': singleton,
+            'defer': defer
         }
     }
 

@@ -33,17 +33,19 @@ class Application(FastAPI):
         """
         service_provider.register()
 
-    def bind(self, name, closure, singleton=False) -> None:
+    def bind(self, name, closure, singleton=False, defer=False) -> None:
         """Bind a service to the application.
 
         Arguments:
         name str -- name of the service.
         closure function -- function to call to create the service.
         singleton bool -- whether multiple instances of the service are allowed.
+        defer bool -- whether to wait loading the service until it is needed.
         """
         self.bindings[name] = {
             'closure': closure,
-            'singleton': singleton
+            'singleton': singleton,
+            'defer': defer
         }
 
     def make(self, name: str) -> Any:

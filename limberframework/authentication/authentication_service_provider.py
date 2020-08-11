@@ -12,4 +12,4 @@ class AuthServiceProvider(ServiceProvider):
         def register_authenticator(app: 'Application'):
             return make_authenticator(app['config']['auth'])
 
-        self.app.bind('auth', register_authenticator)
+        self.app.bind('auth', register_authenticator, defer=True)
