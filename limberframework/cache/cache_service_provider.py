@@ -19,7 +19,15 @@ class CacheServiceProvider(ServiceProvider):
 
             Returns Store object.
             """
-            return make_store(app['config']['cache'], base_path=app.base_path)
+            config = app['config']['cache']
+
+            # Check whether the cache path is a relative
+            # path, and construct the absolute path.
+            if app['config']['cache']['path'][0:1] is not '/':
+                config = app['config']['cache'].copy()
+                config['path'] = app.base_path + '/' + app['config']['cache']['path']
+
+            return make_store(config)
 
         self.app.bind('cache.store', register_store, True)
 
