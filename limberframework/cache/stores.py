@@ -158,7 +158,7 @@ class FileStore(Store):
         """
         return self.get(key)
 
-def make_store(config: Dict, **kwargs) -> Store:
+def make_store(config: Dict) -> Store:
     """Factory function to establish a cache store.
 
     Arguments:
@@ -168,6 +168,6 @@ def make_store(config: Dict, **kwargs) -> Store:
     Store object.
     """
     if config['driver'] == 'file':
-        return FileStore(kwargs['base_path'])
+        return FileStore(config['path'])
 
     raise ValueError(f"Unsupported cache driver {config['driver']}.")
