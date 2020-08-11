@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - psycopg2-binary package to psycopg2.
+- FileStore path to be constructed by CacheServiceProvider from the application base path and cache storage path, and allow the path to be fully overridden with an environment variable.
 
 ## [0.1.0] - 2020-08-09
 ### Added
