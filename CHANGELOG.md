@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - deferrable services which will be loaded when needed.
 - loading of services that are not deferrable so that they are ready for a request.
+- RedisStore and MemcacheStore to interact with a redis or memcache server and use to cache data.
 
 ## [0.1.1] - 2020-08-11
 ### Changed
