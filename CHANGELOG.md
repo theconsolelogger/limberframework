@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- test_make_store_file_store test to pass cache path inside the config dictionary.
+
+### Added
+- deferrable services which will be loaded when needed.
+- loading of services that are not deferrable so that they are ready for a request.
 
 ## [0.1.1] - 2020-08-11
 ### Changed

@@ -6,14 +6,14 @@ from limberframework.cache.stores import make_store, FileStore
 
 def test_make_store_file_store():
     config = {
-        'driver': 'file'
+        'driver': 'file',
+        'path': getcwd()
     }
-    base_path = getcwd()
 
-    response = make_store(config, base_path=base_path)
+    response = make_store(config)
 
     assert isinstance(response, FileStore)
-    assert response.directory == base_path
+    assert response.directory == config['path']
 
 def test_make_store_invalid_driver():
     config = {

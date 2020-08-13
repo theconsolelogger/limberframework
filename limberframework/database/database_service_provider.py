@@ -25,7 +25,7 @@ class DatabaseServiceProvider(ServiceProvider):
             """
             return make_connection(app['config']['database'])
 
-        self.app.bind('db.connection', register_database_connection, True)
+        self.app.bind('db.connection', register_database_connection)
 
         def register_database_session(app: 'Application') -> Session:
             """Closure for establishing a database session
@@ -39,4 +39,4 @@ class DatabaseServiceProvider(ServiceProvider):
             """
             return sessionmaker(bind=app['db.connection'].engine)()
 
-        self.app.bind('db.session', register_database_session)
+        self.app.bind('db.session', register_database_session, defer=True)
