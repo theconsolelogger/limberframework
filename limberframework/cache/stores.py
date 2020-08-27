@@ -16,8 +16,10 @@ from redis import Redis
 from limberframework.hashing.hashers import Hasher
 from limberframework.filesystem.filesystem import FileSystem
 
+
 class Store(metaclass=ABCMeta):
     """Base class for a store."""
+
     @abstractmethod
     def get(self, key: str) -> Dict:
         """Retrieve data from cache.
@@ -63,7 +65,7 @@ class Store(metaclass=ABCMeta):
         Returns:
         dict -- cache data.
         """
-        return {'data': data, 'expires_at': expires_at}
+        return {"data": data, "expires_at": expires_at}
 
     @staticmethod
     def has_expired(expires_at: datetime) -> bool:
@@ -73,14 +75,14 @@ class Store(metaclass=ABCMeta):
 
     @staticmethod
     def encode(value: str, expires_at: datetime) -> str:
-        return expires_at.isoformat() + ',' + value
+        return expires_at.isoformat() + "," + value
 
     @staticmethod
     def decode(contents: str) -> Dict:
-        contents_list = contents.split(',', 1)
+        contents_list = contents.split(",", 1)
         expires_at = datetime.fromisoformat(contents_list[0])
 
-        return {'value': contents_list[1], 'expires_at': expires_at}
+        return {"value": contents_list[1], "expires_at": expires_at}
 
     @classmethod
     def process(cls, contents: str) -> Dict:
@@ -90,7 +92,7 @@ class Store(metaclass=ABCMeta):
         contents = contents.decode()
 
         decoded_contents = cls.decode(contents)
-        return cls.payload(decoded_contents['value'], decoded_contents['expires_at'])
+        return cls.payload(decoded_contents["value"], decoded_contents["expires_at"])
 
     def __getitem__(self, key: str) -> Dict:
         """Retrieves store data for a key.
@@ -102,12 +104,14 @@ class Store(metaclass=ABCMeta):
         """
         return self.get(key)
 
+
 class FileStore(Store):
     """Handles storing and retrieving data from the file system.
 
     Attributes:
     directory str -- system path to cache folder.
     """
+
     def __init__(self, directory: str) -> None:
         """Establishes the store.
 
@@ -125,8 +129,8 @@ class FileStore(Store):
         Returns:
         str -- path to the cache file.
         """
-        hasher = Hasher('sha1')
-        return self.directory + '/' + hasher.hash(key)
+        hasher = Hasher("sha1")
+        return self.directory + "/" + hasher.hash(key)
 
     def get(self, key: str) -> Dict:
         """Retrieves stored data for a key.
@@ -145,11 +149,11 @@ class FileStore(Store):
 
         decoded_contents = self.decode(contents)
 
-        if self.has_expired(decoded_contents['expires_at']):
+        if self.has_expired(decoded_contents["expires_at"]):
             FileSystem.remove(path)
             return self.payload()
 
-        return self.payload(decoded_contents['value'], decoded_contents['expires_at'])
+        return self.payload(decoded_contents["value"], decoded_contents["expires_at"])
 
     def add(self, key: str, value: str, expires_at: datetime) -> bool:
         """Add data to cache storage if it does not already exist.
@@ -186,6 +190,7 @@ class FileStore(Store):
 
         return True
 
+
 class RedisStore(Store):
     def __init__(self, host: str, port: int, db: int, password: str) -> None:
         self.redis = Redis(host=host, port=port, db=db, password=password)
@@ -193,7 +198,7 @@ class RedisStore(Store):
     def get(self, key: str) -> Dict:
         contents = self.redis.get(key)
         return self.process(contents)
-    
+
     def add(self, key: str, value: str, expires_at: datetime) -> bool:
         return self.put(key, value, expires_at, nx=True)
 
@@ -202,6 +207,7 @@ class RedisStore(Store):
         number_seconds = expires_at - datetime.now()
 
         return self.redis.set(key, contents, ex=number_seconds, **kwargs)
+
 
 class MemcacheStore(Store):
     def __init__(self, host: str, port: str) -> None:
@@ -225,6 +231,7 @@ class MemcacheStore(Store):
 
         return self.client.set(key, contents, expire=number_seconds)
 
+
 def make_store(config: Dict) -> Store:
     """Factory function to establish a cache store.
 
@@ -234,19 +241,13 @@ def make_store(config: Dict) -> Store:
     Returns:
     Store object.
     """
-    if config['driver'] == 'file':
-        return FileStore(config['path'])
-    if config['driver'] == 'redis':
+    if config["driver"] == "file":
+        return FileStore(config["path"])
+    if config["driver"] == "redis":
         return RedisStore(
-            config['host'],
-            config['port'],
-            config['db'],
-            config['password']
+            config["host"], config["port"], config["db"], config["password"]
         )
-    if config['driver'] == 'memcache':
-        return MemcacheStore(
-            config['host'],
-            config['port']
-        )
+    if config["driver"] == "memcache":
+        return MemcacheStore(config["host"], config["port"])
 
     raise ValueError(f"Unsupported cache driver {config['driver']}.")

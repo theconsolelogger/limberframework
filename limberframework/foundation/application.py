@@ -8,6 +8,7 @@ from typing import Any
 from fastapi import FastAPI
 from limberframework.support.service_providers import ServiceProvider
 
+
 class Application(FastAPI):
     """The service container for the application,
     registering and managing services.
@@ -17,6 +18,7 @@ class Application(FastAPI):
     bindings dict -- services bound to the service container.
     instances dict -- instances of singleton services.
     """
+
     def __init__(self, base_path: str = None, *args, **kwargs) -> None:
         """Establishes the service container."""
         self.base_path = base_path or getcwd()
@@ -43,9 +45,9 @@ class Application(FastAPI):
         defer bool -- whether to wait loading the service until it is needed.
         """
         self.bindings[name] = {
-            'closure': closure,
-            'singleton': singleton,
-            'defer': defer
+            "closure": closure,
+            "singleton": singleton,
+            "defer": defer,
         }
 
     def make(self, name: str) -> Any:
@@ -62,12 +64,14 @@ class Application(FastAPI):
         try:
             binding = self.bindings[name]
         except KeyError:
-            raise KeyError(f'Unknown service {name}, check service '
-                           f'is bound to the service container.')
+            raise KeyError(
+                f"Unknown service {name}, check service "
+                f"is bound to the service container."
+            )
 
         # If service is not a singleton, return a new instance.
-        if not binding['singleton']:
-            return self.bindings[name]['closure'](self)
+        if not binding["singleton"]:
+            return self.bindings[name]["closure"](self)
 
         # If an existing instance of the singleton
         # service is available return it.
@@ -75,13 +79,13 @@ class Application(FastAPI):
             return self.instances[name]
 
         # Otherwise create a new instance and store it.
-        self.instances[name] = self.bindings[name]['closure'](self)
+        self.instances[name] = self.bindings[name]["closure"](self)
         return self.instances[name]
 
     def load_services(self) -> None:
         """Make instances of registered services that are not deferrable."""
         for service, value in self.bindings.items():
-            if not value['defer']:
+            if not value["defer"]:
                 self.make(service)
 
     def __getitem__(self, name: str) -> Any:

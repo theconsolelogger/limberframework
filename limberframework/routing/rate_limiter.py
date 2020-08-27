@@ -8,6 +8,7 @@ from math import ceil
 from limberframework.cache.cache import Cache
 from limberframework.routing.exceptions import TooManyRequestsException
 
+
 class RateLimiter:
     """Handles storing and retrieving information in the cache
     that is helpful in rate limiting requests.
@@ -17,6 +18,7 @@ class RateLimiter:
     max_hits int -- number of allowed requests.
     decay int -- number of seconds when hits are refreshed.
     """
+
     def __init__(self, cache: Cache, key: str, max_hits: int, decay: int) -> None:
         """Sets up the rate limiter.
 

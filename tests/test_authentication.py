@@ -1,76 +1,84 @@
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from fastapi.exceptions import HTTPException
-from limberframework.authentication.authenticators import ApiKey, HttpBasic, make_authenticator
+from limberframework.authentication.authenticators import (
+    ApiKey,
+    HttpBasic,
+    make_authenticator,
+)
+
 
 def test_make_authenticator_unknown_driver():
-    driver = 'test'
+    driver = "test"
 
     with pytest.raises(Exception) as exc:
-        make_authenticator({'driver': driver})
+        make_authenticator({"driver": driver})
 
     assert f"Unsupported authenticator {driver}." in str(exc.value)
 
+
 def test_make_authenticator_known_driver():
-    http_basic = make_authenticator({'driver': 'httpbasic'})
-    api_key = make_authenticator({'driver': 'apikey'})
+    http_basic = make_authenticator({"driver": "httpbasic"})
+    api_key = make_authenticator({"driver": "apikey"})
 
     assert isinstance(http_basic, HttpBasic)
     assert isinstance(api_key, ApiKey)
 
+
 def test_api_key_get_user_id():
-    key = 'test'
+    key = "test"
     user_id = 1
     mock_session = Mock()
     mock_session.execute.return_value.scalar.return_value = user_id
 
     api_key = ApiKey()
-    response = api_key.get_user_id(mock_session, {'apikey': key})
+    response = api_key.get_user_id(mock_session, {"apikey": key})
 
     mock_session.execute.assert_called_with(
-        "SELECT user_id FROM apikey WHERE key=:key",
-        {"key": key}
+        "SELECT user_id FROM apikey WHERE key=:key", {"key": key}
     )
     mock_session.execute.return_value.scalar.assert_called_once()
     assert response == user_id
 
+
 def test_http_basic_get_user_id():
-    username = 'test'
-    password = 'test'
+    username = "test"
+    password = "test"
     user_id = 1
     mock_session = Mock()
     mock_session.execute.return_value.scalar.return_value = user_id
 
     http_basic = HttpBasic()
-    response = http_basic.get_user_id(mock_session, {'username': username, 'password': password})
+    response = http_basic.get_user_id(
+        mock_session, {"username": username, "password": password}
+    )
 
     mock_session.execute.assert_called_with(
         "SELECT id FROM user WHERE username=:username AND password=:password",
-        {
-            "username": username,
-            "password": password
-        }
+        {"username": username, "password": password},
     )
     mock_session.execute.return_value.scalar.assert_called_once()
     assert response == user_id
 
+
 @pytest.mark.asyncio
-@patch('limberframework.authentication.authenticators.APIKeyHeader')
+@patch("limberframework.authentication.authenticators.APIKeyHeader")
 async def test_api_key_authorise_unauthorised(mock_api_key):
-    key = 'test'
+    key = "test"
     mock_api_key.return_value = AsyncMock(return_value=key)
     mock_request = MagicMock()
 
-    api_key = ApiKey() 
+    api_key = ApiKey()
     api_key.get_user_id = Mock(return_value=None)
 
     with pytest.raises(HTTPException):
         await api_key.authorise(mock_request)
 
+
 @pytest.mark.asyncio
-@patch('limberframework.authentication.authenticators.APIKeyHeader')
+@patch("limberframework.authentication.authenticators.APIKeyHeader")
 async def test_api_key_authorise_authorised(mock_api_key):
-    key = 'test'
+    key = "test"
     user_id = 1
     mock_api_key.return_value = AsyncMock(return_value=key)
     mock_request = MagicMock()
@@ -82,21 +90,23 @@ async def test_api_key_authorise_authorised(mock_api_key):
 
     assert response == user_id
 
+
 @pytest.mark.asyncio
-@patch('limberframework.authentication.authenticators.HTTPBasic')
+@patch("limberframework.authentication.authenticators.HTTPBasic")
 async def test_http_basic_authorise_unauthorised(mock_http_basic):
     credentials = Mock()
     mock_http_basic.return_value = AsyncMock(return_value=credentials)
     mock_request = MagicMock()
 
-    http_basic = HttpBasic() 
+    http_basic = HttpBasic()
     http_basic.get_user_id = Mock(return_value=None)
 
     with pytest.raises(HTTPException):
         await http_basic.authorise(mock_request)
 
+
 @pytest.mark.asyncio
-@patch('limberframework.authentication.authenticators.HTTPBasic')
+@patch("limberframework.authentication.authenticators.HTTPBasic")
 async def test_http_basic_authorise_authorised(mock_http_basic):
     credentials = Mock()
     user_id = 1

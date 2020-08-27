@@ -5,12 +5,14 @@ Classes:
 """
 import hashlib
 
+
 class Hasher:
     """Hashes data using a specified algorithm.
 
     Attributes:
     algorithm str -- name of a hash algorithm.
     """
+
     def __init__(self, algorithm: str) -> None:
         """Establishes the hasher.
 

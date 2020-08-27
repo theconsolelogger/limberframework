@@ -19,12 +19,14 @@ from fastapi.exceptions import HTTPException
 from sqlalchemy.orm.session import Session
 from starlette.status import HTTP_401_UNAUTHORIZED
 
+
 class Authenticator(metaclass=ABCMeta):
     """Base Authenticator class.
 
     Attributes:
     user_id int -- id of user that matches the request credentials.
     """
+
     def __init__(self) -> None:
         """Establishes the Authenticator."""
         self.user_id: int = None
@@ -62,9 +64,11 @@ class Authenticator(metaclass=ABCMeta):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+
 class HttpBasic(Authenticator):
     """An Authenticator for HTTP basic authentication,
     username and password."""
+
     @staticmethod
     def get_user_id(session: Session, credentials: Dict) -> Union[int, None]:
         """Find the user id that matches the username
@@ -80,10 +84,7 @@ class HttpBasic(Authenticator):
         """
         user_id = session.execute(
             "SELECT id FROM user WHERE username=:username AND password=:password",
-            {
-                "username": credentials['username'],
-                "password": credentials['password']
-            }
+            {"username": credentials["username"], "password": credentials["password"]},
         ).scalar()
 
         return user_id
@@ -99,7 +100,7 @@ class HttpBasic(Authenticator):
         int -- user id.
         """
         credentials = await HTTPBasic()(request)
-        user_id = self.get_user_id(request.app['db.session'], credentials.dict())
+        user_id = self.get_user_id(request.app["db.session"], credentials.dict())
 
         if not user_id:
             self.respond_unauthorized()
@@ -107,8 +108,10 @@ class HttpBasic(Authenticator):
         self.user_id = user_id
         return user_id
 
+
 class ApiKey(Authenticator):
     """An Authenticator for API key in the header authentication."""
+
     @staticmethod
     def get_user_id(session: Session, credentials: Dict) -> Union[int, None]:
         """Find the user id that matches the api key
@@ -123,8 +126,7 @@ class ApiKey(Authenticator):
         none -- no user is found for the credentials.
         """
         user_id = session.execute(
-            "SELECT user_id FROM apikey WHERE key=:key",
-            {"key": credentials['apikey']}
+            "SELECT user_id FROM apikey WHERE key=:key", {"key": credentials["apikey"]}
         ).scalar()
 
         return user_id
@@ -139,14 +141,15 @@ class ApiKey(Authenticator):
         Returns:
         int -- user id.
         """
-        api_key = await APIKeyHeader(name='token')(request)
-        user_id = self.get_user_id(request.app['db.session'], api_key)
+        api_key = await APIKeyHeader(name="token")(request)
+        user_id = self.get_user_id(request.app["db.session"], api_key)
 
         if not user_id:
             self.respond_unauthorized()
 
         self.user_id = user_id
         return user_id
+
 
 def make_authenticator(config: Dict) -> Authenticator:
     """Factory function to establish the authenticator.
@@ -157,12 +160,13 @@ def make_authenticator(config: Dict) -> Authenticator:
     Returns:
     Authenticator
     """
-    if config['driver'] == 'httpbasic':
+    if config["driver"] == "httpbasic":
         return HttpBasic()
-    if config['driver'] == 'apikey':
+    if config["driver"] == "apikey":
         return ApiKey()
 
     raise Exception(f"Unsupported authenticator {config['driver']}.")
+
 
 async def authorise(request: Request) -> Optional[int]:
     """Authorises a request by calling the authorise
@@ -174,4 +178,4 @@ async def authorise(request: Request) -> Optional[int]:
     Returns:
     int -- user id for the given credentials.
     """
-    return await request.app['auth'].authorise(request)
+    return await request.app["auth"].authorise(request)
