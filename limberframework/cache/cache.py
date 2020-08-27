@@ -6,6 +6,7 @@ Classes:
 from datetime import datetime
 from limberframework.cache.stores import Store
 
+
 class Cache:
     """Handles retrieving and storing
     data in the store.
@@ -16,6 +17,7 @@ class Cache:
     value str -- value of data.
     expires_at datetime -- time when the data expires.
     """
+
     def __init__(self, store: Store) -> None:
         """Establishes the cache.
 
@@ -36,8 +38,8 @@ class Cache:
         storage = self._store[key]
 
         self._key = key
-        self.value = storage['data']
-        self.expires_at = storage['expires_at']
+        self.value = storage["data"]
+        self.expires_at = storage["expires_at"]
 
     def update(self) -> bool:
         """Stores the data, requires value

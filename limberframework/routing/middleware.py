@@ -12,6 +12,7 @@ from limberframework.hashing.hashers import Hasher
 from limberframework.routing.exceptions import TooManyRequestsException
 from limberframework.routing.rate_limiter import RateLimiter
 
+
 class ThrottleRequestMiddleware(BaseHTTPMiddleware):
     """Enforces rate limits on clients sending requests to the API.
 
@@ -19,6 +20,7 @@ class ThrottleRequestMiddleware(BaseHTTPMiddleware):
     max_hits int -- number of allowed requests by a client.
     decay int -- number of seconds the max_hits applies for.
     """
+
     def __init__(self, *args, max_hits: int = 60, decay: int = 60, **kwargs) -> None:
         """Establishes the middleware.
 
@@ -31,26 +33,25 @@ class ThrottleRequestMiddleware(BaseHTTPMiddleware):
 
         super().__init__(*args, **kwargs)
 
-    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: RequestResponseEndpoint
+    ) -> Response:
         response = Response("Internal server error", status_code=500)
 
         key = self.request_signature(request)
-        limiter = RateLimiter(request.app['cache'], key, self.max_hits, self.decay)
+        limiter = RateLimiter(request.app["cache"], key, self.max_hits, self.decay)
 
         try:
             limiter.hit()
             response = await call_next(request)
         except TooManyRequestsException as error:
-            response = Response(
-                error.detail,
-                error.status_code
-            )
+            response = Response(error.detail, error.status_code)
         finally:
             self.add_headers(
                 response,
                 limiter.max_hits,
                 limiter.remaining_hits(),
-                limiter.available_in()
+                limiter.available_in(),
             )
 
         return response
@@ -64,16 +65,12 @@ class ThrottleRequestMiddleware(BaseHTTPMiddleware):
 
         Returns str.
         """
-        key = str(request.base_url) + '|' + str(request.client.host)
-        hasher = Hasher('sha1')
+        key = str(request.base_url) + "|" + str(request.client.host)
+        hasher = Hasher("sha1")
         return hasher.hash(key)
 
     def add_headers(
-        self,
-        response: Response,
-        max_hits: int,
-        remaining_hits: int,
-        available_in: int
+        self, response: Response, max_hits: int, remaining_hits: int, available_in: int
     ) -> Response:
         """Adds rate limit headers to HTTP response.
 
@@ -92,7 +89,9 @@ class ThrottleRequestMiddleware(BaseHTTPMiddleware):
 
         return response
 
-    def get_headers(self, max_hits: int, remaining_hits: int, available_in: int = None) -> Dict:
+    def get_headers(
+        self, max_hits: int, remaining_hits: int, available_in: int = None
+    ) -> Dict:
         """Generates rate limit headers.
 
         Arguments:
@@ -103,11 +102,11 @@ class ThrottleRequestMiddleware(BaseHTTPMiddleware):
         Returns dict.
         """
         headers = {
-            'X-RateLimit-Limit': str(max_hits),
-            'X-RateLimit-Remaining': str(remaining_hits)
+            "X-RateLimit-Limit": str(max_hits),
+            "X-RateLimit-Remaining": str(remaining_hits),
         }
 
         if available_in:
-            headers['X-RateLimit-Reset'] = str(available_in)
+            headers["X-RateLimit-Reset"] = str(available_in)
 
         return headers

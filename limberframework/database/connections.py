@@ -15,12 +15,14 @@ from abc import ABCMeta, abstractmethod
 from typing import Dict
 from sqlalchemy import create_engine
 
+
 class Connection(metaclass=ABCMeta):
     """Base class for a connection.
 
     Attributes:
     - engine Engine -- a connection to the database.
     """
+
     def __init__(self, connect_args: Dict = {}) -> None:
         """Establishes a connection to the database.
 
@@ -33,6 +35,7 @@ class Connection(metaclass=ABCMeta):
     def get_url(self) -> str:
         """Returns the URL to for the database."""
 
+
 class PostgresConnection(Connection):
     """Connection to a PostgreSQL database.
 
@@ -43,7 +46,10 @@ class PostgresConnection(Connection):
     - port int -- port to communicate with the database on the host.
     - database str -- name of the database.
     """
-    def __init__(self, username: str, password: str, host: str, port: int, database: str) -> None:
+
+    def __init__(
+        self, username: str, password: str, host: str, port: int, database: str
+    ) -> None:
         """Establishes the information needed to connect to the database.
 
         Arguments:
@@ -68,12 +74,14 @@ class PostgresConnection(Connection):
             f"@{self.host}:{self.port}/{self.database}"
         )
 
+
 class SqliteConnection(Connection):
     """Connection to a SQLite database.
 
     Attributes:
     - path str -- location of the database on the file system.
     """
+
     def __init__(self, path: str) -> None:
         """Establishes the information needed to connect to the database.
 
@@ -88,6 +96,7 @@ class SqliteConnection(Connection):
         """Returns the URL to for the database."""
         return f"sqlite:///{self.path}"
 
+
 def make_connection(config: Dict) -> Connection:
     """Factory function to establish a connection to the database.
 
@@ -97,17 +106,15 @@ def make_connection(config: Dict) -> Connection:
     Returns:
     - Connection -- a connection object.
     """
-    if config['driver'] == 'pgsql':
+    if config["driver"] == "pgsql":
         return PostgresConnection(
-            config['username'],
-            config['password'],
-            config['host'],
-            config['port'],
-            config['database']
+            config["username"],
+            config["password"],
+            config["host"],
+            config["port"],
+            config["database"],
         )
-    elif config['driver'] == 'sqlite':
-        return SqliteConnection(
-            config['path']
-        )
+    elif config["driver"] == "sqlite":
+        return SqliteConnection(config["path"])
 
     raise Exception(f"Unsupported driver {config['driver']}")

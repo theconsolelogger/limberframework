@@ -8,13 +8,16 @@ from limberframework.database.connections import Connection
 from limberframework.database.connections import make_connection
 from limberframework.support.service_providers import ServiceProvider
 
+
 class DatabaseServiceProvider(ServiceProvider):
     """Registers database services to the service container."""
+
     def register(self) -> None:
         """Registers the database connection and session
         services to the service container.
         """
-        def register_database_connection(app: 'Application') -> Connection:
+
+        def register_database_connection(app: "Application") -> Connection:
             """Closure for establshing a database connection service.
 
             Arguments:
@@ -23,11 +26,11 @@ class DatabaseServiceProvider(ServiceProvider):
             Returns:
             Connection object
             """
-            return make_connection(app['config']['database'])
+            return make_connection(app["config"]["database"])
 
-        self.app.bind('db.connection', register_database_connection)
+        self.app.bind("db.connection", register_database_connection)
 
-        def register_database_session(app: 'Application') -> Session:
+        def register_database_session(app: "Application") -> Session:
             """Closure for establishing a database session
             using the existing database connection.
 
@@ -37,6 +40,6 @@ class DatabaseServiceProvider(ServiceProvider):
             Returns:
             Session object
             """
-            return sessionmaker(bind=app['db.connection'].engine)()
+            return sessionmaker(bind=app["db.connection"].engine)()
 
-        self.app.bind('db.session', register_database_session, defer=True)
+        self.app.bind("db.session", register_database_session, defer=True)

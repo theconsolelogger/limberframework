@@ -5,9 +5,11 @@ Classes:
 """
 from abc import ABCMeta, abstractmethod
 
+
 class ServiceProvider(metaclass=ABCMeta):
     """Base abstract class for service providers."""
-    def __init__(self, app: 'Application') -> None:
+
+    def __init__(self, app: "Application") -> None:
         """Establishes the application to add the services.
 
         Arguments:

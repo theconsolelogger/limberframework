@@ -7,12 +7,15 @@ Classes:
 from typing import Dict
 from pydantic import BaseSettings
 
+
 class BaseConfig(BaseSettings):
     """Base class for configurations which
     sets reading from a dotenv file.
     """
+
     class Config:
         env_file: str = ".env"
+
 
 class Config:
     """Handles configuration settings for an application.
@@ -20,6 +23,7 @@ class Config:
     Attributes:
     config dict -- the configuration settings.
     """
+
     def __init__(self) -> None:
         """Establishes the initial configuration settings."""
         self.config = {}

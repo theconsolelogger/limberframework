@@ -6,8 +6,10 @@ Classes:
 from os import remove
 from os.path import isfile
 
+
 class FileSystem:
     """Performs actions on files and directories."""
+
     @staticmethod
     def has_file(path: str) -> bool:
         """Checks if a file exists at the system path.
@@ -32,9 +34,9 @@ class FileSystem:
         str -- contents of the file.
         """
         if not isfile(path):
-            raise FileNotFoundError(f'File does not exist at path {path}.')
+            raise FileNotFoundError(f"File does not exist at path {path}.")
 
-        with open(path, 'r') as reader:
+        with open(path, "r") as reader:
             file_contents = reader.read()
 
         return file_contents
@@ -47,7 +49,7 @@ class FileSystem:
         path str -- system path to file.
         contents: str -- contents to write to the file.
         """
-        with open(path, 'w') as writer:
+        with open(path, "w") as writer:
             writer.write(contents)
 
     @staticmethod

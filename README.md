@@ -1,6 +1,7 @@
 # README
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODEOFCONDUCT.md)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 > Note: This repository contains the core code of the Limber Framework. If you want to build an application using Limber, visit the main Limber repository.
 

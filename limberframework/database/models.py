@@ -9,9 +9,11 @@ from sqlalchemy.ext.declarative import as_declarative, declared_attr
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.query import Query
 
+
 @as_declarative()
 class Model:
     """Base class for declarative class definitions."""
+
     id: Any
     __name__: str
     soft_delete: bool = False
@@ -91,7 +93,7 @@ class Model:
         return cls.check_soft_deletes(database.query(cls)).filter_by(**kwargs).all()
 
     @classmethod
-    def create(cls, session: Session, attributes: Dict, **kwargs) -> 'Model':
+    def create(cls, session: Session, attributes: Dict, **kwargs) -> "Model":
         """Creates a new instance of the model and adds to a database session.
 
         Arguments:
@@ -104,7 +106,7 @@ class Model:
         model_object = cls(**attributes, **kwargs)
         return model_object.save(session)
 
-    def save(self, session: Session) -> 'Model':
+    def save(self, session: Session) -> "Model":
         """Adds a Model to a database session.
 
         Arguments:
@@ -116,7 +118,7 @@ class Model:
         session.add(self)
         return self
 
-    def update(self, attributes: Dict) -> 'Model':
+    def update(self, attributes: Dict) -> "Model":
         """Changes the attributes of the Model.
 
         Arguments:
@@ -136,6 +138,6 @@ class Model:
         session Session -- Session object to remove the model from.
         """
         if self.soft_delete:
-            self.update({'deleted_at': datetime.now()})
+            self.update({"deleted_at": datetime.now()})
         else:
             session.delete(self)

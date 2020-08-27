@@ -7,6 +7,7 @@ Classes:
 """
 from starlette.status import HTTP_429_TOO_MANY_REQUESTS
 
+
 class TooManyRequestsException(Exception):
     """An exception for when a client reaches the rate limit.
 
@@ -14,10 +15,11 @@ class TooManyRequestsException(Exception):
     status_code int -- a HTTP status code.
     detail str -- message to describe the error.
     """
+
     def __init__(
         self,
         status_code: int = HTTP_429_TOO_MANY_REQUESTS,
-        detail: str = 'Too many requests.'
+        detail: str = "Too many requests.",
     ) -> None:
         """Establish the status code and detail.
 
