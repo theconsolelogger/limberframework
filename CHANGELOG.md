@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Fixed
 - test_make_store_file_store test to pass cache path inside the config dictionary.
+- circular import in support/service_provider between ServiceProvider and Application.
 
 ### Added
 - deferrable services which will be loaded when needed.
