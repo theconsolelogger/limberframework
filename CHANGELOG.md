@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - flake8 to enforce PEP8 styling.
 - pytest pre-commit hook to run tests before committing.
 
+### Changed
+- restructured tests to match project structure for consistency.
+
 ## [0.1.1] - 2020-08-11
 ### Changed
 - psycopg2-binary package to psycopg2.
