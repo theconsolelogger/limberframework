@@ -21,7 +21,8 @@ def document():
 
 
 @mark.parametrize(
-    "path,exists", [(document_path, True), (getcwd() + "/tests/tests.py", False)]
+    "path,exists",
+    [(document_path, True), (getcwd() + "/tests/tests.py", False)],
 )
 def test_has_file(path, exists, document):
     response = FileSystem.has_file(path)
@@ -37,7 +38,9 @@ def test_read_file_execption():
     with raises(FileNotFoundError) as execinfo:
         FileSystem.read_file(document_path)
 
-    assert f"File does not exist at path {document_path}" in str(execinfo.value)
+    assert f"File does not exist at path {document_path}" in str(
+        execinfo.value
+    )
 
 
 def test_write_file():
@@ -51,7 +54,8 @@ def test_write_file():
 
 
 @mark.parametrize(
-    "path,removed", [(document_path, True), (getcwd() + "/tests/tests.py", False)]
+    "path,removed",
+    [(document_path, True), (getcwd() + "/tests/tests.py", False)],
 )
 def test_remove(path, removed, document):
     response = FileSystem.remove(path)

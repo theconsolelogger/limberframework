@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - loading of services that are not deferrable so that they are ready for a request.
 - RedisStore and MemcacheStore to interact with a redis or memcache server and use to cache data.
 - Black code formatter to provide a consistent format for the project.
+- flake8 to enforce PEP8 styling.
 
 ## [0.1.1] - 2020-08-11
 ### Changed

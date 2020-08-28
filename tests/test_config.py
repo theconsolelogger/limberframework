@@ -14,7 +14,7 @@ def test_init(config):
 def test_get_item(config):
     config.config["test"] = True
 
-    assert config["test"] == True
+    assert config["test"]
 
 
 def test_set_item(config):

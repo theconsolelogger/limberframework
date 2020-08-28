@@ -92,7 +92,9 @@ class Store(metaclass=ABCMeta):
         contents = contents.decode()
 
         decoded_contents = cls.decode(contents)
-        return cls.payload(decoded_contents["value"], decoded_contents["expires_at"])
+        return cls.payload(
+            decoded_contents["value"], decoded_contents["expires_at"]
+        )
 
     def __getitem__(self, key: str) -> Dict:
         """Retrieves store data for a key.
@@ -153,7 +155,9 @@ class FileStore(Store):
             FileSystem.remove(path)
             return self.payload()
 
-        return self.payload(decoded_contents["value"], decoded_contents["expires_at"])
+        return self.payload(
+            decoded_contents["value"], decoded_contents["expires_at"]
+        )
 
     def add(self, key: str, value: str, expires_at: datetime) -> bool:
         """Add data to cache storage if it does not already exist.
@@ -202,7 +206,9 @@ class RedisStore(Store):
     def add(self, key: str, value: str, expires_at: datetime) -> bool:
         return self.put(key, value, expires_at, nx=True)
 
-    def put(self, key: str, value: str, expires_at: datetime, **kwargs) -> bool:
+    def put(
+        self, key: str, value: str, expires_at: datetime, **kwargs
+    ) -> bool:
         contents = self.encode(value, expires_at)
         number_seconds = expires_at - datetime.now()
 

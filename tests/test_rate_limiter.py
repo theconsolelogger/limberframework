@@ -39,7 +39,7 @@ def test_set_hits_no_expiry(mock_cache):
     rate_limiter.set_hits(hits)
 
     assert mock_cache.value == str(hits)
-    assert mock_cache.expires_at != None
+    assert mock_cache.expires_at is not None
     mock_cache.update.assert_called_once()
 
 

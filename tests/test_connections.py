@@ -1,8 +1,6 @@
-from unittest.mock import patch
 from pytest import raises, mark
 from sqlalchemy.engine import Engine
 from limberframework.database.connections import (
-    Connection,
     PostgresConnection,
     SqliteConnection,
     make_connection,
@@ -44,7 +42,9 @@ def test_postgres_connection(config):
     assert postgres_connection.database == config["database"]
 
 
-@mark.parametrize("path", [("./sqlite.db"), ("../database"), ("./database/file.db")])
+@mark.parametrize(
+    "path", [("./sqlite.db"), ("../database"), ("./database/file.db")]
+)
 def test_sqlite_connection(path):
     sqlite_connection = SqliteConnection(path)
 
@@ -108,7 +108,7 @@ def test_make_connection_with_invalid_config():
     with raises(KeyError) as exception:
         make_connection(config)
 
-    assert f"path" in str(exception.value)
+    assert "path" in str(exception.value)
 
 
 def test_make_connection_with_invalid_driver():

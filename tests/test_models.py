@@ -19,7 +19,7 @@ def session():
 
 
 def test_create_model(model):
-    assert model.soft_delete == False
+    assert model.soft_delete is False
     assert model.__tablename__ == "model"
 
 
@@ -112,7 +112,7 @@ def test_update(model):
 def test_destroy_without_soft_delete(model, session):
     response = model.destroy(session)
 
-    assert response == None
+    assert response is None
     session.delete.assert_called_with(model)
 
 

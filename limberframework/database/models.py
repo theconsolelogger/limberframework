@@ -90,7 +90,11 @@ class Model:
         Returns:
         list -- list of records.
         """
-        return cls.check_soft_deletes(database.query(cls)).filter_by(**kwargs).all()
+        return (
+            cls.check_soft_deletes(database.query(cls))
+            .filter_by(**kwargs)
+            .all()
+        )
 
     @classmethod
     def create(cls, session: Session, attributes: Dict, **kwargs) -> "Model":

@@ -4,6 +4,7 @@ Classes:
 - ConfigServiceProvider: Registers configuration services.
 """
 from limberframework.config.config import Config
+from limberframework.foundation.application import Application
 from limberframework.support.service_providers import ServiceProvider
 
 
@@ -15,7 +16,7 @@ class ConfigServiceProvider(ServiceProvider):
         which holds configuration settings for the application.
         """
 
-        def register_config(app: "Application") -> Config:
+        def register_config(app: Application) -> Config:
             """Closure for creating a new config service instance.
 
             Arguments:

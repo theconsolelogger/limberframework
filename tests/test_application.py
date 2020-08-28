@@ -36,8 +36,8 @@ def test_make_unknown_service(application):
         application.make(name)
 
     assert (
-        f"Unknown service {name}, check service is bound to the service container."
-        in str(exception.value)
+        f"Unknown service {name}, check service "
+        f"is bound to the service container." in str(exception.value)
     )
 
 
@@ -75,13 +75,26 @@ def test_load_services(application):
 
     application.make = mock_make
     services = [
-        {"name": "cache", "closure": mock_closure, "singleton": True, "defer": False},
-        {"name": "auth", "closure": mock_closure, "singleton": False, "defer": True},
+        {
+            "name": "cache",
+            "closure": mock_closure,
+            "singleton": True,
+            "defer": False,
+        },
+        {
+            "name": "auth",
+            "closure": mock_closure,
+            "singleton": False,
+            "defer": True,
+        },
     ]
 
     for service in services:
         application.bind(
-            service["name"], service["closure"], service["singleton"], service["defer"]
+            service["name"],
+            service["closure"],
+            service["singleton"],
+            service["defer"],
         )
 
     application.load_services()

@@ -19,7 +19,9 @@ class RateLimiter:
     decay int -- number of seconds when hits are refreshed.
     """
 
-    def __init__(self, cache: Cache, key: str, max_hits: int, decay: int) -> None:
+    def __init__(
+        self, cache: Cache, key: str, max_hits: int, decay: int
+    ) -> None:
         """Sets up the rate limiter.
 
         Arguments:
@@ -55,7 +57,9 @@ class RateLimiter:
         self.cache.value = str(number_hits)
 
         if not self.cache.expires_at:
-            self.cache.expires_at = datetime.now() + timedelta(seconds=self.decay)
+            self.cache.expires_at = datetime.now() + timedelta(
+                seconds=self.decay
+            )
 
         self.cache.update()
 
@@ -75,7 +79,9 @@ class RateLimiter:
         Returns int.
         """
         if not self.cache.expires_at:
-            return ceil((datetime.now() + timedelta(seconds=self.decay)).timestamp())
+            return ceil(
+                (datetime.now() + timedelta(seconds=self.decay)).timestamp()
+            )
         return ceil((self.cache.expires_at - datetime.now()).total_seconds())
 
     def remaining_hits(self) -> int:

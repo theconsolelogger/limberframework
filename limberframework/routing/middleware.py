@@ -7,7 +7,10 @@ Classes:
 """
 from typing import Dict
 from fastapi import Request, Response
-from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from starlette.middleware.base import (
+    BaseHTTPMiddleware,
+    RequestResponseEndpoint,
+)
 from limberframework.hashing.hashers import Hasher
 from limberframework.routing.exceptions import TooManyRequestsException
 from limberframework.routing.rate_limiter import RateLimiter
@@ -21,7 +24,9 @@ class ThrottleRequestMiddleware(BaseHTTPMiddleware):
     decay int -- number of seconds the max_hits applies for.
     """
 
-    def __init__(self, *args, max_hits: int = 60, decay: int = 60, **kwargs) -> None:
+    def __init__(
+        self, *args, max_hits: int = 60, decay: int = 60, **kwargs
+    ) -> None:
         """Establishes the middleware.
 
         Arguments:
@@ -39,7 +44,9 @@ class ThrottleRequestMiddleware(BaseHTTPMiddleware):
         response = Response("Internal server error", status_code=500)
 
         key = self.request_signature(request)
-        limiter = RateLimiter(request.app["cache"], key, self.max_hits, self.decay)
+        limiter = RateLimiter(
+            request.app["cache"], key, self.max_hits, self.decay
+        )
 
         try:
             limiter.hit()
@@ -70,7 +77,11 @@ class ThrottleRequestMiddleware(BaseHTTPMiddleware):
         return hasher.hash(key)
 
     def add_headers(
-        self, response: Response, max_hits: int, remaining_hits: int, available_in: int
+        self,
+        response: Response,
+        max_hits: int,
+        remaining_hits: int,
+        available_in: int,
     ) -> Response:
         """Adds rate limit headers to HTTP response.
 
@@ -78,7 +89,8 @@ class ThrottleRequestMiddleware(BaseHTTPMiddleware):
         response Response -- a Response object.
         max_hits int -- number of allowed requests by a client.
         remaining_hits int --  number of unused allowed requests by a client.
-        available_in int -- number of seconds until the number of allowed requests is refreshed.
+        available_in int -- number of seconds until the number of allowed
+        requests is refreshed.
 
         Returns Response.
         """
@@ -97,7 +109,8 @@ class ThrottleRequestMiddleware(BaseHTTPMiddleware):
         Arguments:
         max_hits int -- number of allowed requests by a client.
         remaining_hits int --  number of unused allowed requests by a client.
-        available_in int -- number of seconds until the number of allowed requests is refreshed.
+        available_in int -- number of seconds until the number of allowed
+        requests is refreshed.
 
         Returns dict.
         """
