@@ -5,6 +5,7 @@ Classes:
 """
 from limberframework.cache.cache import Cache
 from limberframework.cache.stores import make_store, Store
+from limberframework.foundation.application import Application
 from limberframework.support.service_providers import ServiceProvider
 
 
@@ -14,7 +15,7 @@ class CacheServiceProvider(ServiceProvider):
     def register(self):
         """Registers the cache store to the service container."""
 
-        def register_store(app: "Application") -> Store:
+        def register_store(app: Application) -> Store:
             """Closure for establishing a cache store.
 
             Arguments:
@@ -26,15 +27,17 @@ class CacheServiceProvider(ServiceProvider):
 
             # Check whether the cache path is a relative
             # path, and construct the absolute path.
-            if app["config"]["cache"]["path"][0:1] is not "/":
+            if app["config"]["cache"]["path"][0:1] != "/":
                 config = app["config"]["cache"].copy()
-                config["path"] = app.base_path + "/" + app["config"]["cache"]["path"]
+                config["path"] = (
+                    app.base_path + "/" + app["config"]["cache"]["path"]
+                )
 
             return make_store(config)
 
         self.app.bind("cache.store", register_store, True)
 
-        def register_cache(app: "Application") -> Cache:
+        def register_cache(app: Application) -> Cache:
             """Closure for establishing a
             cache and linking to a store.
 

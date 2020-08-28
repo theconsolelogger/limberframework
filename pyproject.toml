@@ -29,3 +29,24 @@ pylint = "2.5.3"
 coverage = "5.2.1"
 pytest-asyncio = "0.14.0"
 pre-commit = "2.7.1"
+
+[tool.black]
+line-length = 79
+target-version = ['py38']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs
+    | \.git
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+)
+'''

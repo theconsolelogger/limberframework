@@ -43,7 +43,9 @@ class Authenticator(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_user_id(self, session: Session, credentials: Dict) -> Union[int, None]:
+    def get_user_id(
+        self, session: Session, credentials: Dict
+    ) -> Union[int, None]:
         """Find the user id that matches the given credentials.
 
         Arguments:
@@ -83,8 +85,12 @@ class HttpBasic(Authenticator):
         none -- no user is found for the credentials.
         """
         user_id = session.execute(
-            "SELECT id FROM user WHERE username=:username AND password=:password",
-            {"username": credentials["username"], "password": credentials["password"]},
+            "SELECT id FROM user WHERE username=:username AND "
+            "password=:password",
+            {
+                "username": credentials["username"],
+                "password": credentials["password"],
+            },
         ).scalar()
 
         return user_id
@@ -100,7 +106,9 @@ class HttpBasic(Authenticator):
         int -- user id.
         """
         credentials = await HTTPBasic()(request)
-        user_id = self.get_user_id(request.app["db.session"], credentials.dict())
+        user_id = self.get_user_id(
+            request.app["db.session"], credentials.dict()
+        )
 
         if not user_id:
             self.respond_unauthorized()
@@ -126,7 +134,8 @@ class ApiKey(Authenticator):
         none -- no user is found for the credentials.
         """
         user_id = session.execute(
-            "SELECT user_id FROM apikey WHERE key=:key", {"key": credentials["apikey"]}
+            "SELECT user_id FROM apikey WHERE key=:key",
+            {"key": credentials["apikey"]},
         ).scalar()
 
         return user_id

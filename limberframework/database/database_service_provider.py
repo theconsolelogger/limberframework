@@ -6,6 +6,7 @@ Classes:
 from sqlalchemy.orm import Session, sessionmaker
 from limberframework.database.connections import Connection
 from limberframework.database.connections import make_connection
+from limberframework.foundation.application import Application
 from limberframework.support.service_providers import ServiceProvider
 
 
@@ -17,7 +18,7 @@ class DatabaseServiceProvider(ServiceProvider):
         services to the service container.
         """
 
-        def register_database_connection(app: "Application") -> Connection:
+        def register_database_connection(app: Application) -> Connection:
             """Closure for establshing a database connection service.
 
             Arguments:
@@ -30,7 +31,7 @@ class DatabaseServiceProvider(ServiceProvider):
 
         self.app.bind("db.connection", register_database_connection)
 
-        def register_database_session(app: "Application") -> Session:
+        def register_database_session(app: Application) -> Session:
             """Closure for establishing a database session
             using the existing database connection.
 

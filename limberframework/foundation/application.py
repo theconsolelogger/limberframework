@@ -41,7 +41,8 @@ class Application(FastAPI):
         Arguments:
         name str -- name of the service.
         closure function -- function to call to create the service.
-        singleton bool -- whether multiple instances of the service are allowed.
+        singleton bool -- whether multiple instances of the service
+        are allowed.
         defer bool -- whether to wait loading the service until it is needed.
         """
         self.bindings[name] = {

@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from math import ceil
-from os import getcwd
 from unittest.mock import patch
 from pytest import raises, mark
 from limberframework.cache.stores import (
@@ -26,7 +25,10 @@ from limberframework.cache.stores import (
             },
             RedisStore,
         ),
-        ({"driver": "memcache", "host": "localhost", "port": 11211}, MemcacheStore),
+        (
+            {"driver": "memcache", "host": "localhost", "port": 11211},
+            MemcacheStore,
+        ),
     ],
 )
 def test_make_store(config, store):
@@ -41,7 +43,9 @@ def test_make_store_invalid_driver():
     with raises(ValueError) as excinfo:
         make_store(config)
 
-    assert f"Unsupported cache driver {config['driver']}." in str(excinfo.value)
+    assert f"Unsupported cache driver {config['driver']}." in str(
+        excinfo.value
+    )
 
 
 @mark.parametrize(
@@ -50,7 +54,8 @@ def test_make_store_invalid_driver():
         ("/test", "/test/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3"),
         (
             "/Users/test/projects/limber/storage/cache",
-            "/Users/test/projects/limber/storage/cache/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3",
+            "/Users/test/projects/limber/storage/cache"
+            "/a94a8fe5ccb19ba61c4c0873d391e987982fbbd3",
         ),
     ],
 )
@@ -122,7 +127,7 @@ def test_file_store_add_invalid_file(mock_file_system):
     file_store = FileStore("/test")
     response = file_store.add(key, value, expires_at)
 
-    assert response == False
+    assert response is False
 
 
 @patch("limberframework.cache.stores.FileSystem")
@@ -218,7 +223,9 @@ def test_payload(data, expires_at, payload):
 
 @patch("limberframework.cache.stores.Redis")
 def test_redis_store_get(mock_redis):
-    mock_redis.return_value.get.return_value = "2020-08-12T00:00:00,test".encode()
+    mock_redis.return_value.get.return_value = (
+        "2020-08-12T00:00:00,test".encode()
+    )
 
     redis_store = RedisStore("localhost", 6379, 0, None)
     response = redis_store.get("test")
@@ -268,7 +275,9 @@ def test_redis_store_put(mock_redis, mock_datetime):
 
 @patch("limberframework.cache.stores.Client")
 def test_memcache_store_get(mock_memcache):
-    mock_memcache.return_value.get.return_value = "2020-08-12T00:00:00,test".encode()
+    mock_memcache.return_value.get.return_value = (
+        "2020-08-12T00:00:00,test".encode()
+    )
 
     memcache_store = MemcacheStore("localhost", 11211)
     response = memcache_store.get("test")
