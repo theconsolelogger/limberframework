@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RedisStore and MemcacheStore to interact with a redis or memcache server and use to cache data.
 - Black code formatter to provide a consistent format for the project.
 - flake8 to enforce PEP8 styling.
+- pytest pre-commit hook to run tests before committing.
 
 ## [0.1.1] - 2020-08-11
 ### Changed
