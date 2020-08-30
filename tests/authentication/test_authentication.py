@@ -2,6 +2,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from fastapi.exceptions import HTTPException
 from limberframework.authentication.authenticators import (
+    authorise,
     ApiKey,
     HttpBasic,
     make_authenticator,
@@ -119,3 +120,17 @@ async def test_http_basic_authorise_authorised(mock_http_basic):
     response = await http_basic.authorise(mock_request)
 
     assert response == user_id
+
+
+@pytest.mark.asyncio
+async def test_authorise():
+    user_id = 1
+
+    mock_auth = AsyncMock()
+    mock_auth.authorise.return_value = user_id
+    mock_request = AsyncMock()
+    mock_request.app.__getitem__.return_value = mock_auth
+
+    authorised = await authorise(mock_request)
+
+    assert authorised == user_id
