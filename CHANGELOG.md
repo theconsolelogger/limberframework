@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Fixed
 - test_make_store_file_store test to pass cache path inside the config dictionary.
+- circular import in support/service_provider between ServiceProvider and Application.
 
 ### Added
 - deferrable services which will be loaded when needed.
@@ -14,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RedisStore and MemcacheStore to interact with a redis or memcache server and use to cache data.
 - Black code formatter to provide a consistent format for the project.
 - flake8 to enforce PEP8 styling.
+- pytest pre-commit hook to run tests before committing.
+- tests to authentication, database middleware, routing middleware, and service providers to increase test coverage to 100%.
+
+### Changed
+- restructured tests to match project structure for consistency.
 
 ## [0.1.1] - 2020-08-11
 ### Changed
