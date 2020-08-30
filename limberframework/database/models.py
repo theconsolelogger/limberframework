@@ -5,6 +5,7 @@ Classes:
 """
 from datetime import datetime
 from typing import Any, Dict, List
+
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.query import Query

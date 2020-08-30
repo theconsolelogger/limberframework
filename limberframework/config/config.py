@@ -5,6 +5,7 @@ Classes:
 - Config: holds configuration settings.
 """
 from typing import Dict
+
 from pydantic import BaseSettings
 
 

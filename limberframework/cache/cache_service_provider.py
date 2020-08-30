@@ -4,7 +4,7 @@ Classes:
 - CacheServiceProvider: Registers cache services.
 """
 from limberframework.cache.cache import Cache
-from limberframework.cache.stores import make_store, Store
+from limberframework.cache.stores import Store, make_store
 from limberframework.foundation.application import Application
 from limberframework.support.service_providers import ServiceProvider
 

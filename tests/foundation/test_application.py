@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock, Mock
+
 from pytest import fixture, raises
+
 from limberframework.foundation.application import Application
 
 

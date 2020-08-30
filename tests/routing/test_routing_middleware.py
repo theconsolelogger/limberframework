@@ -1,8 +1,10 @@
-from unittest.mock import AsyncMock, Mock, MagicMock, patch
-from pytest import mark
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
 from fastapi import Response
-from limberframework.routing.middleware import ThrottleRequestMiddleware
+from pytest import mark
+
 from limberframework.routing.exceptions import TooManyRequestsException
+from limberframework.routing.middleware import ThrottleRequestMiddleware
 
 
 def test_create_throttle_request_middleware():

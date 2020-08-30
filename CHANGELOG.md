@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - flake8 to enforce PEP8 styling.
 - pytest pre-commit hook to run tests before committing.
 - tests to authentication, database middleware, routing middleware, and service providers to increase test coverage to 100%.
+- isort pre-commit hook for consistent ordering of imports.
 
 ### Changed
 - restructured tests to match project structure for consistency.

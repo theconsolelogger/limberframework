@@ -1,13 +1,15 @@
 from datetime import datetime, timedelta
 from math import ceil
 from unittest.mock import patch
-from pytest import raises, mark
+
+from pytest import mark, raises
+
 from limberframework.cache.stores import (
-    make_store,
     FileStore,
     MemcacheStore,
     RedisStore,
     Store,
+    make_store,
 )
 
 
