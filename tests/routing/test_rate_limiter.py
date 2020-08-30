@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
 from math import ceil
 from unittest.mock import patch
+
 from pytest import mark, raises
-from limberframework.routing.rate_limiter import RateLimiter
+
 from limberframework.routing.exceptions import TooManyRequestsException
+from limberframework.routing.rate_limiter import RateLimiter
 
 
 @patch("limberframework.routing.rate_limiter.Cache")

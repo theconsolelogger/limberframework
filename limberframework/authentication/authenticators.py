@@ -12,10 +12,11 @@ authorise -- authorise a request using the established authenticator.
 
 from abc import ABCMeta, abstractmethod
 from typing import Dict, Optional, Union
+
 from fastapi import Request
-from fastapi.security.http import HTTPBasic
-from fastapi.security.api_key import APIKeyHeader
 from fastapi.exceptions import HTTPException
+from fastapi.security.api_key import APIKeyHeader
+from fastapi.security.http import HTTPBasic
 from sqlalchemy.orm.session import Session
 from starlette.status import HTTP_401_UNAUTHORIZED
 

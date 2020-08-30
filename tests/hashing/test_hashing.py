@@ -1,4 +1,5 @@
 from pytest import mark
+
 from limberframework.hashing.hashers import Hasher
 
 

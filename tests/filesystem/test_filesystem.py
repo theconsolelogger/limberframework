@@ -1,6 +1,8 @@
 from os import getcwd, remove
 from os.path import isfile
-from pytest import fixture, raises, mark
+
+from pytest import fixture, mark, raises
+
 from limberframework.filesystem.filesystem import FileSystem
 
 document_path = getcwd() + "/tests/test_file.py"

@@ -1,5 +1,6 @@
-from pytest import raises, mark
+from pytest import mark, raises
 from sqlalchemy.engine import Engine
+
 from limberframework.database.connections import (
     PostgresConnection,
     SqliteConnection,

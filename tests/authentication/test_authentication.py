@@ -1,10 +1,12 @@
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
 import pytest
 from fastapi.exceptions import HTTPException
+
 from limberframework.authentication.authenticators import (
-    authorise,
     ApiKey,
     HttpBasic,
+    authorise,
     make_authenticator,
 )
 

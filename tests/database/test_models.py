@@ -1,5 +1,7 @@
 from unittest.mock import Mock
+
 from pytest import fixture
+
 from limberframework.database.models import Model
 
 
