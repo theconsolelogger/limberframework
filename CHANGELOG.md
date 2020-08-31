@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tests to authentication, database middleware, routing middleware, and service providers to increase test coverage to 100%.
 - isort pre-commit hook for consistent ordering of imports.
 - support for async services by Application.
+- AsyncRedisStore to support asynchronous Redis communication.
 
 ### Changed
 - restructured tests to match project structure for consistency.
