@@ -103,25 +103,28 @@ def test_sqlite_connection_get_url(path, expected_url):
     assert expected_url in url
 
 
-def test_make_connection_with_invalid_config():
+@mark.asyncio
+async def test_make_connection_with_invalid_config():
     config = {"driver": "sqlite"}
 
     with raises(KeyError) as exception:
-        make_connection(config)
+        await make_connection(config)
 
     assert "path" in str(exception.value)
 
 
-def test_make_connection_with_invalid_driver():
+@mark.asyncio
+async def test_make_connection_with_invalid_driver():
     config = {"driver": "invalid_driver"}
 
     with raises(Exception) as exception:
-        make_connection(config)
+        await make_connection(config)
 
     assert f"Unsupported driver {config['driver']}" in str(exception.value)
 
 
-def test_make_connection_pgsql():
+@mark.asyncio
+async def test_make_connection_pgsql():
     config = {
         "driver": "pgsql",
         "username": "test",
@@ -131,6 +134,6 @@ def test_make_connection_pgsql():
         "database": "test",
     }
 
-    response = make_connection(config)
+    response = await make_connection(config)
 
     assert isinstance(response, PostgresConnection)

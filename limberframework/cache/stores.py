@@ -240,7 +240,7 @@ class MemcacheStore(Store):
         return self.client.set(key, contents, expire=number_seconds)
 
 
-def make_store(config: Dict) -> Store:
+async def make_store(config: Dict) -> Store:
     """Factory function to establish a cache store.
 
     Arguments:

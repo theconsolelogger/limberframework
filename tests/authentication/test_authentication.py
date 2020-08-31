@@ -11,18 +11,20 @@ from limberframework.authentication.authenticators import (
 )
 
 
-def test_make_authenticator_unknown_driver():
+@pytest.mark.asyncio
+async def test_make_authenticator_unknown_driver():
     driver = "test"
 
     with pytest.raises(Exception) as exc:
-        make_authenticator({"driver": driver})
+        await make_authenticator({"driver": driver})
 
     assert f"Unsupported authenticator {driver}." in str(exc.value)
 
 
-def test_make_authenticator_known_driver():
-    http_basic = make_authenticator({"driver": "httpbasic"})
-    api_key = make_authenticator({"driver": "apikey"})
+@pytest.mark.asyncio
+async def test_make_authenticator_known_driver():
+    http_basic = await make_authenticator({"driver": "httpbasic"})
+    api_key = await make_authenticator({"driver": "apikey"})
 
     assert isinstance(http_basic, HttpBasic)
     assert isinstance(api_key, ApiKey)

@@ -24,28 +24,29 @@ class Cache:
 
         Arguments:
         store Store -- Store object.
+        key str -- identifier for the data in storage.
         """
         self._store: Store = store
         self._key: str = None
         self.value: str = None
         self.expires_at: datetime = None
 
-    def load(self, key: str) -> None:
+    async def load(self, key: str) -> None:
         """Retrieves data from storage.
 
         Arguments:
         key str -- identifier of the data to load.
         """
-        storage = self._store[key]
+        storage = await self._store.get(key)
 
         self._key = key
         self.value = storage["data"]
         self.expires_at = storage["expires_at"]
 
-    def update(self) -> bool:
+    async def update(self) -> bool:
         """Stores the data, requires value
         and expires_at to have a value.
         """
         if not self.value or not self.expires_at:
             return False
-        return self._store.put(self._key, self.value, self.expires_at)
+        return await self._store.put(self._key, self.value, self.expires_at)

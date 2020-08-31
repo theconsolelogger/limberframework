@@ -161,7 +161,7 @@ class ApiKey(Authenticator):
         return user_id
 
 
-def make_authenticator(config: Dict) -> Authenticator:
+async def make_authenticator(config: Dict) -> Authenticator:
     """Factory function to establish the authenticator.
 
     Arguments:

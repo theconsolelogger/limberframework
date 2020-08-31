@@ -1,6 +1,6 @@
-from unittest.mock import MagicMock, Mock
+from unittest.mock import AsyncMock, MagicMock
 
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from limberframework.foundation.application import Application
 
@@ -31,11 +31,12 @@ def test_bind_service(application):
     }
 
 
-def test_make_unknown_service(application):
+@mark.asyncio
+async def test_make_unknown_service(application):
     name = "test"
 
     with raises(KeyError) as exception:
-        application.make(name)
+        await application.make(name)
 
     assert (
         f"Unknown service {name}, check service "
@@ -43,37 +44,44 @@ def test_make_unknown_service(application):
     )
 
 
-def test_make_known_non_singleton_service(application):
+@mark.asyncio
+async def test_make_known_non_singleton_service(application):
     name = "test"
-    closure = MagicMock
+
+    def return_closure(app):
+        return AsyncMock()
+
+    closure = AsyncMock(side_effect=return_closure)
     singleton = False
 
     application.bind(name, closure, singleton)
-    service_1 = application.make(name)
-    service_2 = application.make(name)
+    service_1 = await application.make(name)
+    service_2 = await application.make(name)
 
-    assert isinstance(service_1, MagicMock)
-    assert isinstance(service_2, MagicMock)
+    assert isinstance(service_1, AsyncMock)
+    assert isinstance(service_2, AsyncMock)
     assert service_1 is not service_2
 
 
-def test_make_known_singleton_service(application):
+@mark.asyncio
+async def test_make_known_singleton_service(application):
     name = "test"
-    closure = MagicMock
+    closure = AsyncMock()
     singleton = True
 
     application.bind(name, closure, singleton)
-    service_1 = application.make(name)
-    service_2 = application.make(name)
+    service_1 = await application.make(name)
+    service_2 = await application.make(name)
 
-    assert isinstance(service_1, MagicMock)
-    assert isinstance(service_2, MagicMock)
+    assert isinstance(service_1, AsyncMock)
+    assert isinstance(service_2, AsyncMock)
     assert service_1 is service_2
 
 
-def test_load_services(application):
-    mock_closure = Mock()
-    mock_make = Mock()
+@mark.asyncio
+async def test_load_services(application):
+    mock_closure = AsyncMock()
+    mock_make = AsyncMock()
 
     application.make = mock_make
     services = [
@@ -99,17 +107,18 @@ def test_load_services(application):
             service["defer"],
         )
 
-    application.load_services()
+    await application.load_services()
 
     application.make.assert_called_once_with(services[0]["name"])
 
 
-def test_get_item(application):
+@mark.asyncio
+async def test_get_item(application):
     name = "test"
-    closure = MagicMock
+    closure = AsyncMock()
     singleton = True
 
     application.bind(name, closure, singleton)
-    service = application[name]
+    service = await application[name]
 
-    assert isinstance(service, MagicMock)
+    assert isinstance(service, AsyncMock)

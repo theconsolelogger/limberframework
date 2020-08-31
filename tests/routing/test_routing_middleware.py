@@ -82,7 +82,10 @@ def test_request_signature():
 
 
 @mark.asyncio
-@patch("limberframework.routing.middleware.RateLimiter")
+@patch(
+    "limberframework.routing.middleware.make_rate_limiter",
+    new_callable=AsyncMock,
+)
 async def test_dispatch_too_many_requests_exception(mock_rate_limiter):
     max_hits = 10
     remaining_hits = 0
@@ -99,7 +102,7 @@ async def test_dispatch_too_many_requests_exception(mock_rate_limiter):
     mock_rate_limiter.return_value.available_in.return_value = available_in
 
     mock_request = MagicMock()
-    mock_request.app.__getitem__.return_value = Mock()
+    mock_request.app.make = AsyncMock()
 
     middleware = ThrottleRequestMiddleware(Mock())
     response = await middleware.dispatch(mock_request, AsyncMock())
@@ -111,7 +114,10 @@ async def test_dispatch_too_many_requests_exception(mock_rate_limiter):
 
 
 @mark.asyncio
-@patch("limberframework.routing.middleware.RateLimiter")
+@patch(
+    "limberframework.routing.middleware.make_rate_limiter",
+    new_callable=AsyncMock,
+)
 async def test_dispatch(mock_rate_limiter):
     max_hits = 10
     remaining_hits = 0
@@ -127,7 +133,7 @@ async def test_dispatch(mock_rate_limiter):
     mock_rate_limiter.return_value.available_in.return_value = available_in
 
     mock_request = MagicMock()
-    mock_request.app.__getitem__.return_value = Mock()
+    mock_request.app.make = AsyncMock()
 
     mock_call_next = AsyncMock()
     mock_call_next.return_value = Response()

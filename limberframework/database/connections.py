@@ -98,7 +98,7 @@ class SqliteConnection(Connection):
         return f"sqlite:///{self.path}"
 
 
-def make_connection(config: Dict) -> Connection:
+async def make_connection(config: Dict) -> Connection:
     """Factory function to establish a connection to the database.
 
     Arguments:

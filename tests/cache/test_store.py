@@ -33,17 +33,19 @@ from limberframework.cache.stores import (
         ),
     ],
 )
-def test_make_store(config, store):
-    response = make_store(config)
+@mark.asyncio
+async def test_make_store(config, store):
+    response = await make_store(config)
 
     assert isinstance(response, store)
 
 
-def test_make_store_invalid_driver():
+@mark.asyncio
+async def test_make_store_invalid_driver():
     config = {"driver": "test"}
 
     with raises(ValueError) as excinfo:
-        make_store(config)
+        await make_store(config)
 
     assert f"Unsupported cache driver {config['driver']}." in str(
         excinfo.value
