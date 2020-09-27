@@ -4,6 +4,7 @@ Classes:
 - CacheServiceProvider: Registers cache services.
 """
 from limberframework.cache.cache import Cache
+from limberframework.cache.lockers import Locker, make_locker
 from limberframework.cache.stores import Store, make_store
 from limberframework.foundation.application import Application
 from limberframework.support.service_providers import ServiceProvider
@@ -38,6 +39,23 @@ class CacheServiceProvider(ServiceProvider):
 
         self.app.bind("cache.store", register_store, True)
 
+        async def register_locker(app: Application) -> Locker:
+            """Closure for establishing a locker.
+
+            Arguments:
+            app Application -- foundation.application.Application object.
+
+            Returns Locker.
+            """
+            config_service = await app.make("config")
+
+            if not config_service["cache"]["locker"]:
+                return None
+
+            return await make_locker(config_service["cache"])
+
+        self.app.bind("cache.locker", register_locker, singleton=True)
+
         async def register_cache(app: Application) -> Cache:
             """Closure for establishing a
             cache and linking to a store.
@@ -48,6 +66,7 @@ class CacheServiceProvider(ServiceProvider):
             Returns Cache.
             """
             store = await app.make("cache.store")
-            return Cache(store)
+            locker = await app.make("cache.locker")
+            return Cache(store, locker)
 
         self.app.bind("cache", register_cache, defer=True)

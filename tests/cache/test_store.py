@@ -44,8 +44,9 @@ from limberframework.cache.stores import (
         ),
     ],
 )
+@patch("limberframework.cache.stores.create_redis")
 @mark.asyncio
-async def test_make_store(config, store):
+async def test_make_store(mock_create_redis, config, store):
     response = await make_store(config)
 
     assert isinstance(response, store)
@@ -377,8 +378,9 @@ async def test_async_redis_add_key_exists():
     assert response is False
 
 
+@patch("limberframework.cache.stores.datetime")
 @mark.asyncio
-async def test_async_redis_add_key_does_not_exist():
+async def test_async_redis_add_key_does_not_exist(mock_datetime):
     key = "test"
     value = "test"
     expires_at = datetime(2020, 8, 12, 1)
@@ -386,7 +388,7 @@ async def test_async_redis_add_key_does_not_exist():
     mock_redis = Mock()
     mock_redis.exists = AsyncMock(return_value=False)
     mock_redis.set = AsyncMock(return_value=True)
-    mock_redis.expireat = AsyncMock()
+    mock_redis.expireat = AsyncMock(return_value=True)
 
     redis_store = AsyncRedisStore(mock_redis)
     response = await redis_store.add(key, value, expires_at)

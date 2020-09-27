@@ -114,9 +114,30 @@ async def test_cache_service_provider_cache_store(path, expected_path, app):
 async def test_cache_service_provider_cache(app):
     path = "/tests"
     config_service = await app.make("config")
-    config_service["cache"] = {"driver": "file", "path": path}
+    config_service["cache"] = {"driver": "file", "path": path, "locker": None}
     app.register(CacheServiceProvider(app))
 
     store = await app.make("cache")
 
     assert isinstance(store, Cache)
+
+
+@patch("limberframework.cache.cache_service_provider.make_locker")
+@mark.asyncio
+async def test_cache_service_provider_cache_locker(mock_make_locker, app):
+    config = {
+        "driver": "asyncredis",
+        "host": "localhost",
+        "port": 6379,
+        "db": 0,
+        "password": None,
+        "locker": "asyncredis",
+    }
+    config_service = await app.make("config")
+    config_service["cache"] = config
+
+    app.register(CacheServiceProvider(app))
+
+    await app.make("cache.locker")
+
+    mock_make_locker.assert_called_once_with(config)

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - test_make_store_file_store test to pass cache path inside the config dictionary.
 - circular import in support/service_provider between ServiceProvider and Application.
+- test_async_redis_add_key_does_not_exist to mock the expireat method with AsyncMock.
 
 ### Added
 - deferrable services which will be loaded when needed.
@@ -20,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - isort pre-commit hook for consistent ordering of imports.
 - support for async services by Application.
 - AsyncRedisStore to support asynchronous Redis communication.
+- cache locker service to lock resources in the cache database, including the AsyncRedisLocker service.
 
 ### Changed
 - restructured tests to match project structure for consistency.
