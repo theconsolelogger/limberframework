@@ -395,7 +395,9 @@ async def test_async_redis_add_key_does_not_exist(mock_datetime):
 
     assert response
     mock_redis.set.assert_called_once_with(key, "2020-08-12T01:00:00,test")
-    mock_redis.expireat.assert_called_once_with(key, expires_at)
+    mock_redis.expireat.assert_called_once_with(
+        key, int(expires_at.timestamp())
+    )
 
 
 @mark.asyncio

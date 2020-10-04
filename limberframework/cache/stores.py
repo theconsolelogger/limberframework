@@ -238,7 +238,7 @@ class AsyncRedisStore(Store):
         contents = self.encode(value, expires_at)
 
         await self.redis.set(key, contents)
-        await self.redis.expireat(key, expires_at)
+        await self.redis.expireat(key, int(expires_at.timestamp()))
 
         return True
 

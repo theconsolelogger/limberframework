@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - test_make_store_file_store test to pass cache path inside the config dictionary.
 - circular import in support/service_provider between ServiceProvider and Application.
 - test_async_redis_add_key_does_not_exist to mock the expireat method with AsyncMock.
+- storing locks in a Locker by correcting the `_locks` attribute name in `AsyncRedisLocker`.
+- the passing of cache configuration settings from `make_locker()` to `AsyncRedisLocker`.
+- the setting of an expire time for a resource in a Redis cache using `AsyncRedisStore`.
+- issues with mocking in test for checking the prevention of too many requests, `test_dispatch_too_many_requests_exception`.
 
 ### Added
 - deferrable services which will be loaded when needed.

@@ -55,7 +55,7 @@ class AsyncRedisLocker(Locker):
         if password:
             connection["password"] = password
 
-        self.lock_manager = Aioredlock([connection])
+        self.lock_manager = Aioredlock([connection], retry_count=1)
 
         super().__init__()
 
@@ -69,7 +69,7 @@ class AsyncRedisLocker(Locker):
         lock = await self.lock_manager.lock(
             f"lock-{key}", lock_timeout=expires_in
         )
-        self._lock[key] = lock
+        self._locks[key] = lock
 
     async def unlock(self, key: str) -> None:
         """Unlocks a key in the Redis database.
@@ -77,7 +77,7 @@ class AsyncRedisLocker(Locker):
         Arguments:
         key str -- the key to unlock.
         """
-        lock = self._lock[key]
+        lock = self._locks[key]
         await self.lock_manager.unlock(lock)
 
 
@@ -90,6 +90,8 @@ async def make_locker(config: Dict) -> Locker:
     Returns Locker object.
     """
     if config["locker"] == "asyncredis":
-        return AsyncRedisLocker(config["redis"])
+        return AsyncRedisLocker(
+            config["host"], config["port"], config["db"], config["password"]
+        )
 
     ValueError(f"Unsupported cache locker {config['locker']}.")
