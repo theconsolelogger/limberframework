@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - the passing of cache configuration settings from `make_locker()` to `AsyncRedisLocker`.
 - the setting of an expire time for a resource in a Redis cache using `AsyncRedisStore`.
 - issues with mocking in test for checking the prevention of too many requests, `test_dispatch_too_many_requests_exception`.
+- `make_locker` raising `ValueError` for unknown locker.
 
 ### Added
 - deferrable services which will be loaded when needed.
@@ -26,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - support for async services by Application.
 - AsyncRedisStore to support asynchronous Redis communication.
 - cache locker service to lock resources in the cache database, including the AsyncRedisLocker service.
+- tests for `locker` module.
 
 ### Changed
 - restructured tests to match project structure for consistency.

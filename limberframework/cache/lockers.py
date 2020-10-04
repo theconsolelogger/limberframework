@@ -94,4 +94,4 @@ async def make_locker(config: Dict) -> Locker:
             config["host"], config["port"], config["db"], config["password"]
         )
 
-    ValueError(f"Unsupported cache locker {config['locker']}.")
+    raise ValueError(f"Unsupported cache locker {config['locker']}.")
