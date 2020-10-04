@@ -37,10 +37,12 @@ def app():
     [("sqlite", SqliteConnection), ("pgsql", PostgresConnection)],
 )
 @patch("limberframework.database.connections.create_engine")
-def test_database_service_provider_database_connection(
+@mark.asyncio
+async def test_database_service_provider_database_connection(
     mock_create_engine, driver, connection, app
 ):
-    app["config"]["database"] = {
+    config_service = await app.make("config")
+    config_service["database"] = {
         "driver": driver,
         "path": "./test.db",
         "username": "test",
@@ -51,19 +53,21 @@ def test_database_service_provider_database_connection(
     }
     app.register(DatabaseServiceProvider(app))
 
-    database = app["db.connection"]
+    database = await app.make("db.connection")
 
     assert isinstance(database, connection)
 
 
-def test_database_service_provider_database_session(app):
-    app["config"]["database"] = {
+@mark.asyncio
+async def test_database_service_provider_database_session(app):
+    config_service = await app.make("config")
+    config_service["database"] = {
         "driver": "sqlite",
         "path": "./test.db",
     }
     app.register(DatabaseServiceProvider(app))
 
-    session = app["db.session"]
+    session = await app.make("db.session")
 
     assert isinstance(session, Session)
 
@@ -79,11 +83,13 @@ def test_config_service_provider():
 @mark.parametrize(
     "driver,authenticator", [("httpbasic", HttpBasic), ("apikey", ApiKey)]
 )
-def test_authentication_service_provider(driver, authenticator, app):
-    app["config"]["auth"] = {"driver": driver}
+@mark.asyncio
+async def test_authentication_service_provider(driver, authenticator, app):
+    config_service = await app.make("config")
+    config_service["auth"] = {"driver": driver}
     app.register(AuthServiceProvider(app))
 
-    auth = app["auth"]
+    auth = await app.make("auth")
 
     assert isinstance(auth, authenticator)
 
@@ -92,21 +98,46 @@ def test_authentication_service_provider(driver, authenticator, app):
     "path,expected_path",
     [("/", "/"), ("/tests", "/tests"), ("./tests", f"{getcwd()}/./tests")],
 )
-def test_cache_service_provider_cache_store(path, expected_path, app):
-    app["config"]["cache"] = {"driver": "file", "path": path}
+@mark.asyncio
+async def test_cache_service_provider_cache_store(path, expected_path, app):
+    config_service = await app.make("config")
+    config_service["cache"] = {"driver": "file", "path": path}
     app.register(CacheServiceProvider(app))
 
-    store = app["cache.store"]
+    store = await app.make("cache.store")
 
     assert isinstance(store, FileStore)
     assert store.directory == expected_path
 
 
-def test_cache_service_provider_cache(app):
+@mark.asyncio
+async def test_cache_service_provider_cache(app):
     path = "/tests"
-    app["config"]["cache"] = {"driver": "file", "path": path}
+    config_service = await app.make("config")
+    config_service["cache"] = {"driver": "file", "path": path, "locker": None}
     app.register(CacheServiceProvider(app))
 
-    store = app["cache"]
+    store = await app.make("cache")
 
     assert isinstance(store, Cache)
+
+
+@patch("limberframework.cache.cache_service_provider.make_locker")
+@mark.asyncio
+async def test_cache_service_provider_cache_locker(mock_make_locker, app):
+    config = {
+        "driver": "asyncredis",
+        "host": "localhost",
+        "port": 6379,
+        "db": 0,
+        "password": None,
+        "locker": "asyncredis",
+    }
+    config_service = await app.make("config")
+    config_service["cache"] = config
+
+    app.register(CacheServiceProvider(app))
+
+    await app.make("cache.locker")
+
+    mock_make_locker.assert_called_once_with(config)

@@ -18,7 +18,7 @@ class DatabaseServiceProvider(ServiceProvider):
         services to the service container.
         """
 
-        def register_database_connection(app: Application) -> Connection:
+        async def register_database_connection(app: Application) -> Connection:
             """Closure for establshing a database connection service.
 
             Arguments:
@@ -27,11 +27,12 @@ class DatabaseServiceProvider(ServiceProvider):
             Returns:
             Connection object
             """
-            return make_connection(app["config"]["database"])
+            config_service = await app.make("config")
+            return await make_connection(config_service["database"])
 
         self.app.bind("db.connection", register_database_connection)
 
-        def register_database_session(app: Application) -> Session:
+        async def register_database_session(app: Application) -> Session:
             """Closure for establishing a database session
             using the existing database connection.
 
@@ -41,6 +42,7 @@ class DatabaseServiceProvider(ServiceProvider):
             Returns:
             Session object
             """
-            return sessionmaker(bind=app["db.connection"].engine)()
+            db_connection = await app.make("db.connection")
+            return sessionmaker(bind=db_connection.engine)()
 
         self.app.bind("db.session", register_database_session, defer=True)

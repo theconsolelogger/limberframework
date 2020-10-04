@@ -53,7 +53,7 @@ class Application(FastAPI):
             "defer": defer,
         }
 
-    def make(self, name: str) -> Any:
+    async def make(self, name: str) -> Any:
         """Create a new instance of a service, if the service
         is marked as a singleton then any existing
         instance will be retuned.
@@ -74,7 +74,7 @@ class Application(FastAPI):
 
         # If service is not a singleton, return a new instance.
         if not binding["singleton"]:
-            return self.bindings[name]["closure"](self)
+            return await self.bindings[name]["closure"](self)
 
         # If an existing instance of the singleton
         # service is available return it.
@@ -82,16 +82,16 @@ class Application(FastAPI):
             return self.instances[name]
 
         # Otherwise create a new instance and store it.
-        self.instances[name] = self.bindings[name]["closure"](self)
+        self.instances[name] = await self.bindings[name]["closure"](self)
         return self.instances[name]
 
-    def load_services(self) -> None:
+    async def load_services(self) -> None:
         """Make instances of registered services that are not deferrable."""
         for service, value in self.bindings.items():
             if not value["defer"]:
-                self.make(service)
+                await self.make(service)
 
-    def __getitem__(self, name: str) -> Any:
+    async def __getitem__(self, name: str) -> Any:
         """Retrieve a service.
 
         Arguments:
@@ -100,4 +100,4 @@ class Application(FastAPI):
         Returns:
         Any -- an instance of the service.
         """
-        return self.make(name)
+        return await self.make(name)

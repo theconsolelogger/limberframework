@@ -21,7 +21,7 @@ class DatabaseSessionMiddleware(BaseHTTPMiddleware):
         response = Response("Internal server error", status_code=500)
 
         try:
-            request.state.db = request.app["db.session"]
+            request.state.db = await request.app.make("db.session")
             response = await call_next(request)
             request.state.db.commit()
         finally:

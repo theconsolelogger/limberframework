@@ -35,8 +35,6 @@ class RateLimiter:
         self.max_hits: int = max_hits
         self.decay: int = decay
 
-        cache.load(key)
-
     def get_hits(self) -> int:
         """Retrieves number of hits for a request
         from the cache.
@@ -47,7 +45,7 @@ class RateLimiter:
             return 0
         return int(self.cache.value)
 
-    def set_hits(self, number_hits: int) -> None:
+    async def set_hits(self, number_hits: int) -> None:
         """Updates the store with the number of hits,
         additionally updates the expiry time if not
         already updated.
@@ -62,16 +60,16 @@ class RateLimiter:
                 seconds=self.decay
             )
 
-        self.cache.update()
+        await self.cache.update()
 
-    def hit(self) -> None:
+    async def hit(self) -> None:
         """Update cache with new record for a request."""
         number_hits = self.get_hits()
 
         if number_hits >= self.max_hits:
             raise TooManyRequestsException()
 
-        self.set_hits(number_hits + 1)
+        await self.set_hits(number_hits + 1)
 
     def available_in(self) -> int:
         """Calculates the number of seconds until
@@ -91,3 +89,10 @@ class RateLimiter:
         Returns int.
         """
         return self.max_hits - self.get_hits()
+
+
+async def make_rate_limiter(
+    cache: Cache, key: str, max_hits: int, decay: int
+) -> RateLimiter:
+    await cache.load(key)
+    return RateLimiter(cache, key, max_hits, decay)

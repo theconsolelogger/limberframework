@@ -16,7 +16,7 @@ class ConfigServiceProvider(ServiceProvider):
         which holds configuration settings for the application.
         """
 
-        def register_config(app: Application) -> Config:
+        async def register_config(app: Application) -> Config:
             """Closure for creating a new config service instance.
 
             Arguments:

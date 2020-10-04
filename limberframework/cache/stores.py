@@ -12,6 +12,7 @@ from datetime import datetime
 from math import ceil
 from typing import Dict
 
+from aioredis import RedisConnection, create_redis
 from pymemcache.client.base import Client
 from redis import Redis
 
@@ -217,6 +218,34 @@ class RedisStore(Store):
         return self.redis.set(key, contents, ex=number_seconds, **kwargs)
 
 
+class AsyncRedisStore(Store):
+    def __init__(self, redis: RedisConnection) -> None:
+        self.redis = redis
+
+    async def get(self, key: str):
+        contents = await self.redis.get(key)
+        return self.process(contents)
+
+    async def add(self, key: str, value: str, expires_at: datetime) -> bool:
+        key_exists = await self.redis.exists(key)
+
+        if key_exists:
+            return False
+
+        return await self.put(key, value, expires_at)
+
+    async def put(self, key: str, value: str, expires_at: datetime, **kwargs):
+        contents = self.encode(value, expires_at)
+
+        await self.redis.set(key, contents)
+        await self.redis.expireat(key, int(expires_at.timestamp()))
+
+        return True
+
+    async def __getitem__(self, key: str) -> Dict:
+        return await self.get(key)
+
+
 class MemcacheStore(Store):
     def __init__(self, host: str, port: str) -> None:
         self.client = Client((host, port))
@@ -240,7 +269,7 @@ class MemcacheStore(Store):
         return self.client.set(key, contents, expire=number_seconds)
 
 
-def make_store(config: Dict) -> Store:
+async def make_store(config: Dict) -> Store:
     """Factory function to establish a cache store.
 
     Arguments:
@@ -255,6 +284,13 @@ def make_store(config: Dict) -> Store:
         return RedisStore(
             config["host"], config["port"], config["db"], config["password"]
         )
+    if config["driver"] == "asyncredis":
+        redis = await create_redis(
+            f"redis://{config['host']}:{config['port']}",
+            password=config["password"],
+            db=config["db"],
+        )
+        return AsyncRedisStore(redis)
     if config["driver"] == "memcache":
         return MemcacheStore(config["host"], config["port"])
 

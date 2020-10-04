@@ -82,8 +82,11 @@ def test_request_signature():
 
 
 @mark.asyncio
-@patch("limberframework.routing.middleware.RateLimiter")
-async def test_dispatch_too_many_requests_exception(mock_rate_limiter):
+@patch(
+    "limberframework.routing.middleware.make_rate_limiter",
+    new_callable=AsyncMock,
+)
+async def test_dispatch_too_many_requests_exception(mock_make_rate_limiter):
     max_hits = 10
     remaining_hits = 0
     available_in = 1000
@@ -93,13 +96,16 @@ async def test_dispatch_too_many_requests_exception(mock_rate_limiter):
         "X-RateLimit-Reset": str(available_in),
     }
 
-    mock_rate_limiter.return_value.hit.side_effect = TooManyRequestsException()
-    mock_rate_limiter.return_value.max_hits = max_hits
-    mock_rate_limiter.return_value.remaining_hits.return_value = remaining_hits
-    mock_rate_limiter.return_value.available_in.return_value = available_in
+    mock_rate_limiter = Mock()
+    mock_rate_limiter.hit = AsyncMock(side_effect=TooManyRequestsException)
+    mock_rate_limiter.max_hits = max_hits
+    mock_rate_limiter.remaining_hits.return_value = remaining_hits
+    mock_rate_limiter.available_in.return_value = available_in
+
+    mock_make_rate_limiter.return_value = mock_rate_limiter
 
     mock_request = MagicMock()
-    mock_request.app.__getitem__.return_value = Mock()
+    mock_request.app.make = AsyncMock()
 
     middleware = ThrottleRequestMiddleware(Mock())
     response = await middleware.dispatch(mock_request, AsyncMock())
@@ -111,8 +117,11 @@ async def test_dispatch_too_many_requests_exception(mock_rate_limiter):
 
 
 @mark.asyncio
-@patch("limberframework.routing.middleware.RateLimiter")
-async def test_dispatch(mock_rate_limiter):
+@patch(
+    "limberframework.routing.middleware.make_rate_limiter",
+    new_callable=AsyncMock,
+)
+async def test_dispatch(mock_make_rate_limiter):
     max_hits = 10
     remaining_hits = 0
     available_in = 1000
@@ -122,12 +131,16 @@ async def test_dispatch(mock_rate_limiter):
         "X-RateLimit-Reset": str(available_in),
     }
 
-    mock_rate_limiter.return_value.max_hits = max_hits
-    mock_rate_limiter.return_value.remaining_hits.return_value = remaining_hits
-    mock_rate_limiter.return_value.available_in.return_value = available_in
+    mock_rate_limiter = Mock()
+    mock_rate_limiter.hit = AsyncMock()
+    mock_rate_limiter.max_hits = max_hits
+    mock_rate_limiter.remaining_hits.return_value = remaining_hits
+    mock_rate_limiter.available_in.return_value = available_in
+
+    mock_make_rate_limiter.return_value = mock_rate_limiter
 
     mock_request = MagicMock()
-    mock_request.app.__getitem__.return_value = Mock()
+    mock_request.app.make = AsyncMock()
 
     mock_call_next = AsyncMock()
     mock_call_next.return_value = Response()

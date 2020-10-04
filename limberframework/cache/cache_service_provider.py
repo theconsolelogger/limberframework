@@ -4,6 +4,7 @@ Classes:
 - CacheServiceProvider: Registers cache services.
 """
 from limberframework.cache.cache import Cache
+from limberframework.cache.lockers import Locker, make_locker
 from limberframework.cache.stores import Store, make_store
 from limberframework.foundation.application import Application
 from limberframework.support.service_providers import ServiceProvider
@@ -15,7 +16,7 @@ class CacheServiceProvider(ServiceProvider):
     def register(self):
         """Registers the cache store to the service container."""
 
-        def register_store(app: Application) -> Store:
+        async def register_store(app: Application) -> Store:
             """Closure for establishing a cache store.
 
             Arguments:
@@ -23,21 +24,39 @@ class CacheServiceProvider(ServiceProvider):
 
             Returns Store object.
             """
-            config = app["config"]["cache"]
+            config_service = await app.make("config")
+            config = config_service["cache"]
 
             # Check whether the cache path is a relative
             # path, and construct the absolute path.
-            if app["config"]["cache"]["path"][0:1] != "/":
-                config = app["config"]["cache"].copy()
+            if config_service["cache"]["path"][0] != "/":
+                config = config_service["cache"].copy()
                 config["path"] = (
-                    app.base_path + "/" + app["config"]["cache"]["path"]
+                    app.base_path + "/" + config_service["cache"]["path"]
                 )
 
-            return make_store(config)
+            return await make_store(config)
 
         self.app.bind("cache.store", register_store, True)
 
-        def register_cache(app: Application) -> Cache:
+        async def register_locker(app: Application) -> Locker:
+            """Closure for establishing a locker.
+
+            Arguments:
+            app Application -- foundation.application.Application object.
+
+            Returns Locker.
+            """
+            config_service = await app.make("config")
+
+            if not config_service["cache"]["locker"]:
+                return None
+
+            return await make_locker(config_service["cache"])
+
+        self.app.bind("cache.locker", register_locker, singleton=True)
+
+        async def register_cache(app: Application) -> Cache:
             """Closure for establishing a
             cache and linking to a store.
 
@@ -46,6 +65,8 @@ class CacheServiceProvider(ServiceProvider):
 
             Returns Cache.
             """
-            return Cache(app["cache.store"])
+            store = await app.make("cache.store")
+            locker = await app.make("cache.locker")
+            return Cache(store, locker)
 
         self.app.bind("cache", register_cache, defer=True)

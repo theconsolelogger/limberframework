@@ -15,7 +15,7 @@ from starlette.middleware.base import (
 
 from limberframework.hashing.hashers import Hasher
 from limberframework.routing.exceptions import TooManyRequestsException
-from limberframework.routing.rate_limiter import RateLimiter
+from limberframework.routing.rate_limiter import make_rate_limiter
 
 
 class ThrottleRequestMiddleware(BaseHTTPMiddleware):
@@ -46,12 +46,13 @@ class ThrottleRequestMiddleware(BaseHTTPMiddleware):
         response = Response("Internal server error", status_code=500)
 
         key = self.request_signature(request)
-        limiter = RateLimiter(
-            request.app["cache"], key, self.max_hits, self.decay
+        cache = await request.app.make("cache")
+        limiter = await make_rate_limiter(
+            cache, key, self.max_hits, self.decay
         )
 
         try:
-            limiter.hit()
+            await limiter.hit()
             response = await call_next(request)
         except TooManyRequestsException as error:
             response = Response(error.detail, error.status_code)

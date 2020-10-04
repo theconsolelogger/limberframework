@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
 from math import ceil
-from unittest.mock import patch
+from unittest.mock import AsyncMock, Mock, call, patch
 
 from pytest import mark, raises
 
 from limberframework.cache.stores import (
+    AsyncRedisStore,
     FileStore,
     MemcacheStore,
     RedisStore,
@@ -31,19 +32,32 @@ from limberframework.cache.stores import (
             {"driver": "memcache", "host": "localhost", "port": 11211},
             MemcacheStore,
         ),
+        (
+            {
+                "driver": "asyncredis",
+                "host": "localhost",
+                "port": 6379,
+                "db": 0,
+                "password": None,
+            },
+            AsyncRedisStore,
+        ),
     ],
 )
-def test_make_store(config, store):
-    response = make_store(config)
+@patch("limberframework.cache.stores.create_redis")
+@mark.asyncio
+async def test_make_store(mock_create_redis, config, store):
+    response = await make_store(config)
 
     assert isinstance(response, store)
 
 
-def test_make_store_invalid_driver():
+@mark.asyncio
+async def test_make_store_invalid_driver():
     config = {"driver": "test"}
 
     with raises(ValueError) as excinfo:
-        make_store(config)
+        await make_store(config)
 
     assert f"Unsupported cache driver {config['driver']}." in str(
         excinfo.value
@@ -334,3 +348,66 @@ def test_memcache_store_put(mock_memcache, mock_datetime):
     mock_memcache.return_value.set.assert_called_once_with(
         key, "2020-08-12T01:00:00,test", expire=expire
     )
+
+
+@mark.asyncio
+async def test_async_redis_get():
+    mock_redis = Mock()
+    mock_redis.get = AsyncMock(
+        return_value="2020-08-12T00:00:00,test".encode()
+    )
+
+    redis_store = AsyncRedisStore(mock_redis)
+    response = await redis_store.get("test")
+
+    assert response == {"data": "test", "expires_at": datetime(2020, 8, 12)}
+
+
+@mark.asyncio
+async def test_async_redis_add_key_exists():
+    key = "test"
+    value = "test"
+    expires_at = datetime(2020, 8, 12, 1)
+
+    mock_redis = Mock()
+    mock_redis.exists = AsyncMock(return_value=True)
+
+    redis_store = AsyncRedisStore(mock_redis)
+    response = await redis_store.add(key, value, expires_at)
+
+    assert response is False
+
+
+@patch("limberframework.cache.stores.datetime")
+@mark.asyncio
+async def test_async_redis_add_key_does_not_exist(mock_datetime):
+    key = "test"
+    value = "test"
+    expires_at = datetime(2020, 8, 12, 1)
+
+    mock_redis = Mock()
+    mock_redis.exists = AsyncMock(return_value=False)
+    mock_redis.set = AsyncMock(return_value=True)
+    mock_redis.expireat = AsyncMock(return_value=True)
+
+    redis_store = AsyncRedisStore(mock_redis)
+    response = await redis_store.add(key, value, expires_at)
+
+    assert response
+    mock_redis.set.assert_called_once_with(key, "2020-08-12T01:00:00,test")
+    mock_redis.expireat.assert_called_once_with(
+        key, int(expires_at.timestamp())
+    )
+
+
+@mark.asyncio
+async def test_async_redis_get_item():
+    key = "test"
+    mock_get = AsyncMock()
+
+    redis_store = AsyncRedisStore(Mock())
+    redis_store.get = mock_get
+
+    await redis_store[key]
+
+    assert mock_get.mock_calls == [call(key)]
