@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from limberframework.database.connections import Connection, make_connection
 from limberframework.foundation.application import Application
-from limberframework.support.service_providers import ServiceProvider
+from limberframework.support.services import ServiceProvider
 
 
 class DatabaseServiceProvider(ServiceProvider):

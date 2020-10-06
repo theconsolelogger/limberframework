@@ -8,7 +8,7 @@ from typing import Any
 
 from fastapi import FastAPI
 
-from limberframework.support.service_providers import ServiceProvider
+from limberframework.support.services import Service, ServiceProvider
 
 
 class Application(FastAPI):
@@ -47,11 +47,7 @@ class Application(FastAPI):
         are allowed.
         defer bool -- whether to wait loading the service until it is needed.
         """
-        self.bindings[name] = {
-            "closure": closure,
-            "singleton": singleton,
-            "defer": defer,
-        }
+        self.bindings[name] = Service(name, closure, singleton, defer)
 
     async def make(self, name: str) -> Any:
         """Create a new instance of a service, if the service
@@ -73,8 +69,8 @@ class Application(FastAPI):
             )
 
         # If service is not a singleton, return a new instance.
-        if not binding["singleton"]:
-            return await self.bindings[name]["closure"](self)
+        if not binding.singleton:
+            return await self.bindings[name].closure(self)
 
         # If an existing instance of the singleton
         # service is available return it.
@@ -82,14 +78,14 @@ class Application(FastAPI):
             return self.instances[name]
 
         # Otherwise create a new instance and store it.
-        self.instances[name] = await self.bindings[name]["closure"](self)
+        self.instances[name] = await self.bindings[name].closure(self)
         return self.instances[name]
 
     async def load_services(self) -> None:
         """Make instances of registered services that are not deferrable."""
-        for service, value in self.bindings.items():
-            if not value["defer"]:
-                await self.make(service)
+        for service in self.bindings.values():
+            if not service.defer:
+                await self.make(service.name)
 
     async def __getitem__(self, name: str) -> Any:
         """Retrieve a service.

@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock, MagicMock
 from pytest import fixture, mark, raises
 
 from limberframework.foundation.application import Application
+from limberframework.support.services import Service
 
 
 @fixture
@@ -27,7 +28,7 @@ def test_bind_service(application):
     application.bind(name, mock_closure, singleton, defer)
 
     assert application.bindings == {
-        name: {"closure": mock_closure, "singleton": singleton, "defer": defer}
+        name: Service(name, mock_closure, singleton, defer)
     }
 
 

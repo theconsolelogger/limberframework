@@ -5,7 +5,7 @@ Classes:
 """
 from limberframework.config.config import Config
 from limberframework.foundation.application import Application
-from limberframework.support.service_providers import ServiceProvider
+from limberframework.support.services import ServiceProvider
 
 
 class ConfigServiceProvider(ServiceProvider):

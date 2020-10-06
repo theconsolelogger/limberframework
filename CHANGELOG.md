@@ -28,9 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - AsyncRedisStore to support asynchronous Redis communication.
 - cache locker service to lock resources in the cache database, including the AsyncRedisLocker service.
 - tests for `locker` module.
+- `Service` class to represent a service that is required by the service container.
 
 ### Changed
 - restructured tests to match project structure for consistency.
+- `Application` class to use the `Service` class when binding a service.
 
 ## [0.1.1] - 2020-08-11
 ### Changed

@@ -7,7 +7,7 @@ from limberframework.cache.cache import Cache
 from limberframework.cache.lockers import Locker, make_locker
 from limberframework.cache.stores import Store, make_store
 from limberframework.foundation.application import Application
-from limberframework.support.service_providers import ServiceProvider
+from limberframework.support.services import ServiceProvider
 
 
 class CacheServiceProvider(ServiceProvider):

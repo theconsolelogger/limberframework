@@ -1,5 +1,5 @@
 from os import getcwd
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 from pytest import fixture, mark
 from sqlalchemy.orm import Session
@@ -22,6 +22,7 @@ from limberframework.database.database_service_provider import (
     DatabaseServiceProvider,
 )
 from limberframework.foundation.application import Application
+from limberframework.support.services import Service
 
 
 @fixture
@@ -141,3 +142,34 @@ async def test_cache_service_provider_cache_locker(mock_make_locker, app):
     await app.make("cache.locker")
 
     mock_make_locker.assert_called_once_with(config)
+
+
+def test_create_service():
+    """Tests creating a Service NamedTuple."""
+    name = "Test Service"
+    closure = Mock()
+    singleton = True
+    defer = True
+
+    service = Service(name, closure, singleton, defer)
+
+    assert service.name == name
+    assert service.closure == closure
+    assert service.singleton == singleton
+    assert service.defer == defer
+
+
+def test_service_representation():
+    """Tests retrieving a string representation of a Service."""
+    name = "Test Service"
+    closure = Mock()
+    singleton = True
+    defer = True
+
+    service = Service(name, closure, singleton, defer)
+    str_representation = str(service)
+
+    assert str_representation == (
+        f"<Service name={name}, closure={closure}, "
+        f"singleton={singleton}, defer={defer}>"
+    )

@@ -5,7 +5,7 @@ Classes:
 """
 from limberframework.authentication.authenticators import make_authenticator
 from limberframework.foundation.application import Application
-from limberframework.support.service_providers import ServiceProvider
+from limberframework.support.services import ServiceProvider
 
 
 class AuthServiceProvider(ServiceProvider):
