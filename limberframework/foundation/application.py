@@ -21,7 +21,7 @@ class Application(FastAPI):
     _instances dict -- created instances of singleton services.
     """
 
-    def __init__(self, base_path: str = None, *args, **kwargs) -> None:
+    def __init__(self, *args, base_path: str = None, **kwargs) -> None:
         """Establishes the service container.
 
         Arguments:

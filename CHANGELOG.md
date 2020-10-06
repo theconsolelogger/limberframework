@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - issues with mocking in test for checking the prevention of too many requests, `test_dispatch_too_many_requests_exception`.
 - `make_locker` raising `ValueError` for unknown locker.
 - improve documentation for the `Application` class.
+- ordering of parameters for `Application.__init__()`.
 
 ### Added
 - deferrable services which will be loaded when needed.
