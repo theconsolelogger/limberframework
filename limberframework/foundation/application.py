@@ -47,6 +47,12 @@ class Application(FastAPI):
         are allowed.
         defer bool -- whether to wait loading the service until it is needed.
         """
+        if name in self.bindings:
+            raise ValueError(
+                f"A service with the name {name} has already "
+                f"be bound to the service container."
+            )
+
         self.bindings[name] = Service(name, closure, singleton, defer)
 
     async def make(self, name: str) -> Any:

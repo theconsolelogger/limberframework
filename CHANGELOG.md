@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - cache locker service to lock resources in the cache database, including the AsyncRedisLocker service.
 - tests for `locker` module.
 - `Service` class to represent a service that is required by the service container.
+- check for a used service name when attempting to bind a new service to the service container in `Application.bind()`.
 
 ### Changed
 - restructured tests to match project structure for consistency.

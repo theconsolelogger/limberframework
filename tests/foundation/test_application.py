@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 from pytest import fixture, mark, raises
 
@@ -30,6 +30,24 @@ def test_bind_service(application):
     assert application.bindings == {
         name: Service(name, mock_closure, singleton, defer)
     }
+
+
+def test_binding_service_with_used_name(application):
+    """Test binding a service to the service container where
+    the name has already been used to bind another service.
+    """
+    name = "test"
+
+    application.bindings = {name: Mock()}
+
+    with raises(
+        ValueError,
+        match=(
+            f"A service with the name {name} has already "
+            f"be bound to the service container."
+        ),
+    ):
+        application.bind(name, Mock())
 
 
 @mark.asyncio
