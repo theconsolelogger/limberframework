@@ -74,7 +74,7 @@ class Application(FastAPI):
 
         # If an existing instance of the singleton
         # service is available return it.
-        if name in self.instances.keys():
+        if name in self.instances:
             return self.instances[name]
 
         # Otherwise create a new instance and store it.
