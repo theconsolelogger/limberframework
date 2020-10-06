@@ -135,7 +135,7 @@ class FileStore(Store):
         str -- path to the cache file.
         """
         hasher = Hasher("sha1")
-        return self.directory + "/" + hasher.hash(key)
+        return self.directory + "/" + hasher(key)
 
     def get(self, key: str) -> Dict:
         """Retrieves stored data for a key.

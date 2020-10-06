@@ -21,7 +21,7 @@ class Hasher:
         """
         self.algorithm = algorithm
 
-    def hash(self, value: str) -> str:
+    def __call__(self, value: str) -> str:
         """Hashes a string using the sha1 algorithm.
 
         Arguments:

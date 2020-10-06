@@ -69,6 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Database session to autocommit and autoflush.
 - Commit session to database after processing the request in the DatabaseSessionMiddleware.
 - Pipenv to poetry for package management and distribution.
+- Hasher class to a callable to hash a value rather than using the `hash()` method.
 
 ### Removed
 - Singleton metaclass as singletons are now handled by the Application class.

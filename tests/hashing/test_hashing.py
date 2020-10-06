@@ -15,6 +15,6 @@ from limberframework.hashing.hashers import Hasher
 )
 def test_hash(value, hashed_value):
     hasher = Hasher("sha1")
-    response = hasher.hash(value)
+    response = hasher(value)
 
     assert response == hashed_value

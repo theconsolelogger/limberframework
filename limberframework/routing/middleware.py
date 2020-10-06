@@ -77,7 +77,7 @@ class ThrottleRequestMiddleware(BaseHTTPMiddleware):
         """
         key = str(request.base_url) + "|" + str(request.client.host)
         hasher = Hasher("sha1")
-        return hasher.hash(key)
+        return hasher(key)
 
     def add_headers(
         self,
