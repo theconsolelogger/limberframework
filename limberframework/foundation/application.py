@@ -17,15 +17,15 @@ class Application(FastAPI):
 
     Attributes:
     config dict -- application configuration settings.
-    bindings dict -- services bound to the service container.
-    instances dict -- instances of singleton services.
+    _bindings dict -- services bound to the service container.
+    _instances dict -- instances of singleton services.
     """
 
     def __init__(self, base_path: str = None, *args, **kwargs) -> None:
         """Establishes the service container."""
         self.base_path = base_path or getcwd()
-        self.bindings = {}
-        self.instances = {}
+        self._bindings = {}
+        self._instances = {}
 
         super().__init__(*args, **kwargs)
 
@@ -47,13 +47,13 @@ class Application(FastAPI):
         are allowed.
         defer bool -- whether to wait loading the service until it is needed.
         """
-        if name in self.bindings:
+        if name in self._bindings:
             raise ValueError(
                 f"A service with the name {name} has already "
                 f"be bound to the service container."
             )
 
-        self.bindings[name] = Service(name, closure, singleton, defer)
+        self._bindings[name] = Service(name, closure, singleton, defer)
 
     async def make(self, name: str) -> Any:
         """Create a new instance of a service, if the service
@@ -67,7 +67,7 @@ class Application(FastAPI):
         Any -- an instance of the service.
         """
         try:
-            binding = self.bindings[name]
+            binding = self._bindings[name]
         except KeyError:
             raise KeyError(
                 f"Unknown service {name}, check service "
@@ -76,20 +76,20 @@ class Application(FastAPI):
 
         # If service is not a singleton, return a new instance.
         if not binding.singleton:
-            return await self.bindings[name].closure(self)
+            return await self._bindings[name].closure(self)
 
         # If an existing instance of the singleton
         # service is available return it.
-        if name in self.instances:
-            return self.instances[name]
+        if name in self._instances:
+            return self._instances[name]
 
         # Otherwise create a new instance and store it.
-        self.instances[name] = await self.bindings[name].closure(self)
-        return self.instances[name]
+        self._instances[name] = await self._bindings[name].closure(self)
+        return self._instances[name]
 
     async def load_services(self) -> None:
         """Make instances of registered services that are not deferrable."""
-        for service in self.bindings.values():
+        for service in self._bindings.values():
             if not service.defer:
                 await self.make(service.name)
 

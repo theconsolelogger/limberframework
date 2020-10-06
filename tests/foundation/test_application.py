@@ -27,7 +27,7 @@ def test_bind_service(application):
 
     application.bind(name, mock_closure, singleton, defer)
 
-    assert application.bindings == {
+    assert application._bindings == {
         name: Service(name, mock_closure, singleton, defer)
     }
 
@@ -38,7 +38,7 @@ def test_binding_service_with_used_name(application):
     """
     name = "test"
 
-    application.bindings = {name: Mock()}
+    application._bindings = {name: Mock()}
 
     with raises(
         ValueError,

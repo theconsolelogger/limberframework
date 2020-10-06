@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - restructured tests to match project structure for consistency.
 - `Application` class to use the `Service` class when binding a service.
 - `Application.bind()` to check for instances of a singleton service without `.keys()`.
+- `Application` class bindings and instances private attributes.
 
 ## [0.1.1] - 2020-08-11
 ### Changed
