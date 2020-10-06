@@ -16,13 +16,17 @@ class Application(FastAPI):
     registering and managing services.
 
     Attributes:
-    config dict -- application configuration settings.
+    base_path str -- system path to the application.
     _bindings dict -- services bound to the service container.
-    _instances dict -- instances of singleton services.
+    _instances dict -- created instances of singleton services.
     """
 
     def __init__(self, base_path: str = None, *args, **kwargs) -> None:
-        """Establishes the service container."""
+        """Establishes the service container.
+
+        Arguments:
+        base_path str -- system path to the application.
+        """
         self.base_path = base_path or getcwd()
         self._bindings = {}
         self._instances = {}
@@ -33,7 +37,8 @@ class Application(FastAPI):
         """Register a service provider with the application.
 
         Arguments:
-        service_provider ServiceProvider -- ServiceProvider object.
+        service_provider limberframework.support.services.ServiceProvider --
+        the service provider to register.
         """
         service_provider.register()
 

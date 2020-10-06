@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - the setting of an expire time for a resource in a Redis cache using `AsyncRedisStore`.
 - issues with mocking in test for checking the prevention of too many requests, `test_dispatch_too_many_requests_exception`.
 - `make_locker` raising `ValueError` for unknown locker.
+- improve documentation for the `Application` class.
 
 ### Added
 - deferrable services which will be loaded when needed.
