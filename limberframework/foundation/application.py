@@ -97,14 +97,3 @@ class Application(FastAPI):
         for service in self._bindings.values():
             if not service.defer:
                 await self.make(service.name)
-
-    async def __getitem__(self, name: str) -> Any:
-        """Retrieve a service.
-
-        Arguments:
-        name str -- name of the service.
-
-        Returns:
-        Any -- an instance of the service.
-        """
-        return await self.make(name)

@@ -38,6 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Application.bind()` to check for instances of a singleton service without `.keys()`.
 - `Application` class bindings and instances private attributes.
 
+### Removed
+- `__getitem__()` from `Application` class as it no longer fits with the async capability of the class.
+
 ## [0.1.1] - 2020-08-11
 ### Changed
 - psycopg2-binary package to psycopg2.

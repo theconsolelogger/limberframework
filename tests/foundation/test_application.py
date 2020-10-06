@@ -129,15 +129,3 @@ async def test_load_services(application):
     await application.load_services()
 
     application.make.assert_called_once_with(services[0]["name"])
-
-
-@mark.asyncio
-async def test_get_item(application):
-    name = "test"
-    closure = AsyncMock()
-    singleton = True
-
-    application.bind(name, closure, singleton)
-    service = await application[name]
-
-    assert isinstance(service, AsyncMock)
