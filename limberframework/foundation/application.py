@@ -8,7 +8,7 @@ from typing import Any
 
 from fastapi import FastAPI
 
-from limberframework.support.services import Service, ServiceProvider
+from limberframework.support.services import Service
 
 
 class Application(FastAPI):
@@ -32,15 +32,6 @@ class Application(FastAPI):
         self._instances = {}
 
         super().__init__(*args, **kwargs)
-
-    def register(self, service_provider: ServiceProvider) -> None:
-        """Register a service provider with the application.
-
-        Arguments:
-        service_provider limberframework.support.services.ServiceProvider --
-        the service provider to register.
-        """
-        service_provider.register()
 
     def bind(self, name, closure, singleton=False, defer=False) -> None:
         """Bind a service to the application.

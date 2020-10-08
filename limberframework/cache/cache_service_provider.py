@@ -13,8 +13,13 @@ from limberframework.support.services import ServiceProvider
 class CacheServiceProvider(ServiceProvider):
     """Registers cache services to the service container."""
 
-    def register(self):
-        """Registers the cache store to the service container."""
+    def register(self, app: Application):
+        """Registers the cache store to the service container.
+
+        Arguments:
+        app limberframework.foundation.application.Application --
+        the service container.
+        """
 
         async def register_store(app: Application) -> Store:
             """Closure for establishing a cache store.
@@ -37,7 +42,7 @@ class CacheServiceProvider(ServiceProvider):
 
             return await make_store(config)
 
-        self.app.bind("cache.store", register_store, True)
+        app.bind("cache.store", register_store, True)
 
         async def register_locker(app: Application) -> Locker:
             """Closure for establishing a locker.
@@ -54,7 +59,7 @@ class CacheServiceProvider(ServiceProvider):
 
             return await make_locker(config_service["cache"])
 
-        self.app.bind("cache.locker", register_locker, singleton=True)
+        app.bind("cache.locker", register_locker, singleton=True)
 
         async def register_cache(app: Application) -> Cache:
             """Closure for establishing a
@@ -69,4 +74,4 @@ class CacheServiceProvider(ServiceProvider):
             locker = await app.make("cache.locker")
             return Cache(store, locker)
 
-        self.app.bind("cache", register_cache, defer=True)
+        app.bind("cache", register_cache, defer=True)

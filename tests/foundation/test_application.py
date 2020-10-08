@@ -11,14 +11,6 @@ def application():
     return Application()
 
 
-def test_register_service_provider(application):
-    mock_service_provider = MagicMock()
-
-    application.register(mock_service_provider)
-
-    mock_service_provider.register.assert_called_once()
-
-
 def test_bind_service(application):
     name = "test"
     mock_closure = MagicMock()

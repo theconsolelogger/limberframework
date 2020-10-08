@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - `__getitem__()` from `Application` class as it no longer fits with the async capability of the class.
+- `register()` from `Application` class to simplify the registering of service providers with the service container.
 
 ## [0.1.1] - 2020-08-11
 ### Changed

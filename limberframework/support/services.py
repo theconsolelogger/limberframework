@@ -27,15 +27,11 @@ class Service(NamedTuple):
 class ServiceProvider(metaclass=ABCMeta):
     """Base abstract class for service providers."""
 
-    def __init__(self, app: "Application") -> None:  # noqa
-        """Establishes the application to add the services.
+    @abstractmethod
+    def register(self, app: "Application") -> None:  # noqa
+        """Register service bindings to the container.
 
         Arguments:
-        app Application -- limberframework.foundation.application.Application
-        object.
+        app limberframework.foundation.application.Application --
+        the service container.
         """
-        self.app = app
-
-    @abstractmethod
-    def register(self) -> None:
-        """Register service bindings to the container."""

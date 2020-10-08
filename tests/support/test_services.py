@@ -28,7 +28,8 @@ from limberframework.support.services import Service
 @fixture
 def app():
     app = Application()
-    app.register(ConfigServiceProvider(app))
+    config_service_provider = ConfigServiceProvider()
+    config_service_provider.register(app)
 
     return app
 
@@ -52,7 +53,8 @@ async def test_database_service_provider_database_connection(
         "port": "test",
         "database": "test",
     }
-    app.register(DatabaseServiceProvider(app))
+    database_service_provider = DatabaseServiceProvider()
+    database_service_provider.register(app)
 
     database = await app.make("db.connection")
 
@@ -66,7 +68,8 @@ async def test_database_service_provider_database_session(app):
         "driver": "sqlite",
         "path": "./test.db",
     }
-    app.register(DatabaseServiceProvider(app))
+    database_service_provider = DatabaseServiceProvider()
+    database_service_provider.register(app)
 
     session = await app.make("db.session")
 
@@ -75,8 +78,8 @@ async def test_database_service_provider_database_session(app):
 
 def test_config_service_provider():
     mock_app = MagicMock()
-    config = ConfigServiceProvider(mock_app)
-    config.register()
+    config_service_provider = ConfigServiceProvider()
+    config_service_provider.register(mock_app)
 
     assert mock_app.bind.called_once()
 
@@ -88,7 +91,8 @@ def test_config_service_provider():
 async def test_authentication_service_provider(driver, authenticator, app):
     config_service = await app.make("config")
     config_service["auth"] = {"driver": driver}
-    app.register(AuthServiceProvider(app))
+    auth_service_provider = AuthServiceProvider()
+    auth_service_provider.register(app)
 
     auth = await app.make("auth")
 
@@ -103,7 +107,8 @@ async def test_authentication_service_provider(driver, authenticator, app):
 async def test_cache_service_provider_cache_store(path, expected_path, app):
     config_service = await app.make("config")
     config_service["cache"] = {"driver": "file", "path": path}
-    app.register(CacheServiceProvider(app))
+    cache_service_provider = CacheServiceProvider()
+    cache_service_provider.register(app)
 
     store = await app.make("cache.store")
 
@@ -116,7 +121,8 @@ async def test_cache_service_provider_cache(app):
     path = "/tests"
     config_service = await app.make("config")
     config_service["cache"] = {"driver": "file", "path": path, "locker": None}
-    app.register(CacheServiceProvider(app))
+    cache_service_provider = CacheServiceProvider()
+    cache_service_provider.register(app)
 
     store = await app.make("cache")
 
@@ -137,7 +143,8 @@ async def test_cache_service_provider_cache_locker(mock_make_locker, app):
     config_service = await app.make("config")
     config_service["cache"] = config
 
-    app.register(CacheServiceProvider(app))
+    cache_service_provider = CacheServiceProvider()
+    cache_service_provider.register(app)
 
     await app.make("cache.locker")
 
