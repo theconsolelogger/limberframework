@@ -33,23 +33,20 @@ class Application(FastAPI):
 
         super().__init__(*args, **kwargs)
 
-    def bind(self, name, closure, singleton=False, defer=False) -> None:
+    def bind(self, service: Service) -> None:
         """Bind a service to the application.
 
         Arguments:
-        name str -- name of the service.
-        closure function -- function to call to create the service.
-        singleton bool -- whether multiple instances of the service
-        are allowed.
-        defer bool -- whether to wait loading the service until it is needed.
+        service limberframework.support.services.Service --
+        the service to bind.
         """
-        if name in self._bindings:
+        if service.name in self._bindings:
             raise ValueError(
-                f"A service with the name {name} has already "
+                f"A service with the name {service.name} has already "
                 f"be bound to the service container."
             )
 
-        self._bindings[name] = Service(name, closure, singleton, defer)
+        self._bindings[service.name] = service
 
     async def make(self, name: str) -> Any:
         """Create a new instance of a service, if the service

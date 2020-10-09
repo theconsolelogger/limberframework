@@ -17,7 +17,7 @@ def test_bind_service(application):
     singleton = True
     defer = True
 
-    application.bind(name, mock_closure, singleton, defer)
+    application.bind(Service(name, mock_closure, singleton, defer))
 
     assert application._bindings == {
         name: Service(name, mock_closure, singleton, defer)
@@ -39,7 +39,7 @@ def test_binding_service_with_used_name(application):
             f"be bound to the service container."
         ),
     ):
-        application.bind(name, Mock())
+        application.bind(Service(name, Mock()))
 
 
 @mark.asyncio
@@ -65,7 +65,7 @@ async def test_make_known_non_singleton_service(application):
     closure = AsyncMock(side_effect=return_closure)
     singleton = False
 
-    application.bind(name, closure, singleton)
+    application.bind(Service(name, closure, singleton=singleton))
     service_1 = await application.make(name)
     service_2 = await application.make(name)
 
@@ -80,7 +80,7 @@ async def test_make_known_singleton_service(application):
     closure = AsyncMock()
     singleton = True
 
-    application.bind(name, closure, singleton)
+    application.bind(Service(name, closure, singleton=singleton))
     service_1 = await application.make(name)
     service_2 = await application.make(name)
 
@@ -112,10 +112,12 @@ async def test_load_services(application):
 
     for service in services:
         application.bind(
-            service["name"],
-            service["closure"],
-            service["singleton"],
-            service["defer"],
+            Service(
+                service["name"],
+                service["closure"],
+                service["singleton"],
+                service["defer"],
+            )
         )
 
     await application.load_services()

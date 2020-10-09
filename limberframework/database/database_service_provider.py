@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from limberframework.database.connections import Connection, make_connection
 from limberframework.foundation.application import Application
-from limberframework.support.services import ServiceProvider
+from limberframework.support.services import Service, ServiceProvider
 
 
 class DatabaseServiceProvider(ServiceProvider):
@@ -34,7 +34,7 @@ class DatabaseServiceProvider(ServiceProvider):
             config_service = await app.make("config")
             return await make_connection(config_service["database"])
 
-        app.bind("db.connection", register_database_connection)
+        app.bind(Service("db.connection", register_database_connection))
 
         async def register_database_session(app: Application) -> Session:
             """Closure for establishing a database session
@@ -49,4 +49,4 @@ class DatabaseServiceProvider(ServiceProvider):
             db_connection = await app.make("db.connection")
             return sessionmaker(bind=db_connection.engine)()
 
-        app.bind("db.session", register_database_session, defer=True)
+        app.bind(Service("db.session", register_database_session, defer=True))

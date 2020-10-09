@@ -5,7 +5,7 @@ Classes:
 """
 from limberframework.config.config import Config
 from limberframework.foundation.application import Application
-from limberframework.support.services import ServiceProvider
+from limberframework.support.services import Service, ServiceProvider
 
 
 class ConfigServiceProvider(ServiceProvider):
@@ -31,4 +31,4 @@ class ConfigServiceProvider(ServiceProvider):
             """
             return Config()
 
-        app.bind("config", register_config, True)
+        app.bind(Service("config", register_config, singleton=True))

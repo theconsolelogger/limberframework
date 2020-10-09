@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Application` class to use the `Service` class when binding a service.
 - `Application.bind()` to check for instances of a singleton service without `.keys()`.
 - `Application` class bindings and instances private attributes.
+- `Application.bind()` to accept a `Service` instance as an argument.
 
 ### Removed
 - `__getitem__()` from `Application` class as it no longer fits with the async capability of the class.
