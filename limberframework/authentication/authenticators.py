@@ -108,7 +108,7 @@ class HttpBasic(Authenticator):
         """
         credentials = await HTTPBasic()(request)
         user_id = self.get_user_id(
-            request.app["db.session"], credentials.dict()
+            request.app.make("db.session"), credentials.dict()
         )
 
         if not user_id:
@@ -152,7 +152,7 @@ class ApiKey(Authenticator):
         int -- user id.
         """
         api_key = await APIKeyHeader(name="token")(request)
-        user_id = self.get_user_id(request.app["db.session"], api_key)
+        user_id = self.get_user_id(request.app.make("db.session"), api_key)
 
         if not user_id:
             self.respond_unauthorized()
@@ -188,4 +188,5 @@ async def authorise(request: Request) -> Optional[int]:
     Returns:
     int -- user id for the given credentials.
     """
-    return await request.app["auth"].authorise(request)
+    authenticator = await request.app.make("auth")
+    return await authenticator.authorise(request)

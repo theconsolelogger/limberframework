@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `make_locker` raising `ValueError` for unknown locker.
 - improve documentation for the `Application` class.
 - ordering of parameters for `Application.__init__()`.
+- making services in `authentication.authenticators` modules to use `Application.make` method.
 
 ### Added
 - deferrable services which will be loaded when needed.

@@ -130,10 +130,9 @@ async def test_http_basic_authorise_authorised(mock_http_basic):
 async def test_authorise():
     user_id = 1
 
-    mock_auth = AsyncMock()
-    mock_auth.authorise.return_value = user_id
-    mock_request = AsyncMock()
-    mock_request.app.__getitem__.return_value = mock_auth
+    mock_request = Mock()
+    mock_request.app.make = AsyncMock()
+    mock_request.app.make.return_value.authorise.return_value = user_id
 
     authorised = await authorise(mock_request)
 
