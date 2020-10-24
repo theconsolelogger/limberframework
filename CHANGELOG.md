@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Application.bind()` to check for instances of a singleton service without `.keys()`.
 - `Application` class bindings and instances private attributes.
 - `Application.bind()` to accept a `Service` instance as an argument.
+- making of stores by moving the construction of a cache connection to the `make_store()` factory function.
 
 ### Removed
 - `__getitem__()` from `Application` class as it no longer fits with the async capability of the class.

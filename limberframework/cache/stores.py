@@ -10,6 +10,7 @@ Functions:
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 from math import ceil
+from os.path import abspath
 from typing import Dict
 
 from aioredis import RedisConnection, create_redis
@@ -199,8 +200,8 @@ class FileStore(Store):
 
 
 class RedisStore(Store):
-    def __init__(self, host: str, port: int, db: int, password: str) -> None:
-        self.redis = Redis(host=host, port=port, db=db, password=password)
+    def __init__(self, redis: Redis) -> None:
+        self.redis = redis
 
     def get(self, key: str) -> Dict:
         contents = self.redis.get(key)
@@ -247,8 +248,8 @@ class AsyncRedisStore(Store):
 
 
 class MemcacheStore(Store):
-    def __init__(self, host: str, port: str) -> None:
-        self.client = Client((host, port))
+    def __init__(self, client: Client) -> None:
+        self.client = client
 
     def get(self, key: str) -> Dict:
         contents = self.client.get(key)
@@ -279,10 +280,16 @@ async def make_store(config: Dict) -> Store:
     Store object.
     """
     if config["driver"] == "file":
-        return FileStore(config["path"])
+        cache_path = abspath(config["path"])
+        return FileStore(cache_path)
     if config["driver"] == "redis":
         return RedisStore(
-            config["host"], config["port"], config["db"], config["password"]
+            Redis(
+                host=config["host"],
+                port=config["port"],
+                db=config["db"],
+                password=config["password"],
+            )
         )
     if config["driver"] == "asyncredis":
         redis = await create_redis(
@@ -292,6 +299,6 @@ async def make_store(config: Dict) -> Store:
         )
         return AsyncRedisStore(redis)
     if config["driver"] == "memcache":
-        return MemcacheStore(config["host"], config["port"])
+        return MemcacheStore(Client((config["host"], config["port"])))
 
     raise ValueError(f"Unsupported cache driver {config['driver']}.")

@@ -30,17 +30,7 @@ class CacheServiceProvider(ServiceProvider):
             Returns Store object.
             """
             config_service = await app.make("config")
-            config = config_service["cache"]
-
-            # Check whether the cache path is a relative
-            # path, and construct the absolute path.
-            if config_service["cache"]["path"][0] != "/":
-                config = config_service["cache"].copy()
-                config["path"] = (
-                    app.base_path + "/" + config_service["cache"]["path"]
-                )
-
-            return await make_store(config)
+            return await make_store(config_service["cache"])
 
         app.bind(Service("cache.store", register_store, singleton=True))
 
@@ -54,10 +44,10 @@ class CacheServiceProvider(ServiceProvider):
             """
             config_service = await app.make("config")
 
-            if not config_service["cache"]["locker"]:
+            try:
+                return await make_locker(config_service["cache"])
+            except ValueError:
                 return None
-
-            return await make_locker(config_service["cache"])
 
         app.bind(Service("cache.locker", register_locker, singleton=True))
 

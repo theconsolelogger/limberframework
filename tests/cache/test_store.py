@@ -237,115 +237,111 @@ def test_payload(data, expires_at, payload):
     assert response == payload
 
 
-@patch("limberframework.cache.stores.Redis")
-def test_redis_store_get(mock_redis):
-    mock_redis.return_value.get.return_value = (
-        "2020-08-12T00:00:00,test".encode()
-    )
+def test_redis_store_get():
+    mock_redis = Mock()
+    mock_redis.get.return_value = "2020-08-12T00:00:00,test".encode()
 
-    redis_store = RedisStore("localhost", 6379, 0, None)
+    redis_store = RedisStore(mock_redis)
     response = redis_store.get("test")
 
     assert response == {"data": "test", "expires_at": datetime(2020, 8, 12)}
 
 
 @patch("limberframework.cache.stores.datetime")
-@patch("limberframework.cache.stores.Redis")
-def test_redis_store_add(mock_redis, mock_datetime):
+def test_redis_store_add(mock_datetime):
     key = "test"
     value = "test"
     expires_at = datetime(2020, 8, 12, 1)
     now = datetime(2020, 8, 12)
     ex = expires_at - now
-    mock_redis.return_value.set.return_value = True
+    mock_redis = Mock()
+    mock_redis.set.return_value = True
     mock_datetime.now.return_value = now
 
-    redis_store = RedisStore("localhost", 6379, 0, None)
+    redis_store = RedisStore(mock_redis)
     response = redis_store.add(key, value, expires_at)
 
     assert response
-    mock_redis.return_value.set.assert_called_once_with(
+    mock_redis.set.assert_called_once_with(
         key, "2020-08-12T01:00:00,test", ex=ex, nx=True
     )
 
 
 @patch("limberframework.cache.stores.datetime")
-@patch("limberframework.cache.stores.Redis")
-def test_redis_store_put(mock_redis, mock_datetime):
+def test_redis_store_put(mock_datetime):
     key = "test"
     value = "test"
     expires_at = datetime(2020, 8, 12, 1)
     now = datetime(2020, 8, 12)
     ex = expires_at - now
-    mock_redis.return_value.set.return_value = True
+    mock_redis = Mock()
+    mock_redis.set.return_value = True
     mock_datetime.now.return_value = now
 
-    redis_store = RedisStore("localhost", 6379, 0, None)
+    redis_store = RedisStore(mock_redis)
     response = redis_store.put(key, value, expires_at)
 
     assert response
-    mock_redis.return_value.set.assert_called_once_with(
+    mock_redis.set.assert_called_once_with(
         key, "2020-08-12T01:00:00,test", ex=ex
     )
 
 
-@patch("limberframework.cache.stores.Client")
-def test_memcache_store_get(mock_memcache):
-    mock_memcache.return_value.get.return_value = (
-        "2020-08-12T00:00:00,test".encode()
-    )
+def test_memcache_store_get():
+    mock_memcache = Mock()
+    mock_memcache.get.return_value = "2020-08-12T00:00:00,test".encode()
 
-    memcache_store = MemcacheStore("localhost", 11211)
+    memcache_store = MemcacheStore(mock_memcache)
     response = memcache_store.get("test")
 
     assert response == {"data": "test", "expires_at": datetime(2020, 8, 12)}
 
 
 @patch("limberframework.cache.stores.datetime")
-@patch("limberframework.cache.stores.Client")
-def test_memcache_store_add(mock_memcache, mock_datetime):
+def test_memcache_store_add(mock_datetime):
     key = "test"
     value = "test"
     expires_at = datetime(2020, 8, 12, 1)
     now = datetime(2020, 8, 12)
     expire = ceil((expires_at - now).total_seconds())
-    mock_memcache.return_value.get.return_value = None
-    mock_memcache.return_value.set.return_value = True
+    mock_memcache = Mock()
+    mock_memcache.get.return_value = None
+    mock_memcache.set.return_value = True
     mock_datetime.now.return_value = now
 
-    memcache_store = MemcacheStore("localhost", 11211)
+    memcache_store = MemcacheStore(mock_memcache)
     response = memcache_store.add(key, value, expires_at)
 
     assert response
-    mock_memcache.return_value.set.assert_called_once_with(
+    mock_memcache.set.assert_called_once_with(
         key, "2020-08-12T01:00:00,test", expire=expire
     )
 
 
-@patch("limberframework.cache.stores.Client")
-def test_memcache_store_add_existing(mock_memcache):
-    memcache_store = MemcacheStore("localhost", 11211)
+def test_memcache_store_add_existing():
+    mock_memcache = Mock()
+    memcache_store = MemcacheStore(mock_memcache)
     response = memcache_store.add("test", "test", datetime(2020, 8, 12, 1))
 
     assert not response
 
 
 @patch("limberframework.cache.stores.datetime")
-@patch("limberframework.cache.stores.Client")
-def test_memcache_store_put(mock_memcache, mock_datetime):
+def test_memcache_store_put(mock_datetime):
     key = "test"
     value = "test"
     expires_at = datetime(2020, 8, 12, 1)
     now = datetime(2020, 8, 12)
     expire = ceil((expires_at - now).total_seconds())
-    mock_memcache.return_value.set.return_value = True
+    mock_memcache = Mock()
+    mock_memcache.set.return_value = True
     mock_datetime.now.return_value = now
 
-    memcache_store = MemcacheStore("localhost", 11211)
+    memcache_store = MemcacheStore(mock_memcache)
     response = memcache_store.put(key, value, expires_at)
 
     assert response
-    mock_memcache.return_value.set.assert_called_once_with(
+    mock_memcache.set.assert_called_once_with(
         key, "2020-08-12T01:00:00,test", expire=expire
     )
 

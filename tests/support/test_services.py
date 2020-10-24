@@ -101,7 +101,7 @@ async def test_authentication_service_provider(driver, authenticator, app):
 
 @mark.parametrize(
     "path,expected_path",
-    [("/", "/"), ("/tests", "/tests"), ("./tests", f"{getcwd()}/./tests")],
+    [("/", "/"), ("/tests", "/tests"), ("./tests", f"{getcwd()}/tests")],
 )
 @mark.asyncio
 async def test_cache_service_provider_cache_store(path, expected_path, app):
