@@ -41,21 +41,13 @@ class Locker(metaclass=ABCMeta):
 class AsyncRedisLocker(Locker):
     """Locker for a Redis database with an async connection."""
 
-    def __init__(self, host: str, port: str, db: str, password: str):
+    def __init__(self, lock_manager: Aioredlock) -> None:
         """Establishes the connection to the Redis database.
 
         Arguments:
-        host str -- machine which the Redis database is on.
-        port str -- port to communicate with the Redis database.
-        db str -- the Redis database to use.
-        password str -- password to authenticate with the Redis database.
+        lock_manager aioredlock.Aioredlock -- an Aioredlock connection.
         """
-        connection = {"host": host, "port": port, "db": db}
-
-        if password:
-            connection["password"] = password
-
-        self.lock_manager = Aioredlock([connection], retry_count=1)
+        self.lock_manager = lock_manager
 
         super().__init__()
 
@@ -90,8 +82,15 @@ async def make_locker(config: Dict) -> Locker:
     Returns Locker object.
     """
     if config["locker"] == "asyncredis":
-        return AsyncRedisLocker(
-            config["host"], config["port"], config["db"], config["password"]
-        )
+        connection = {
+            "host": config["host"],
+            "port": config["port"],
+            "db": config["db"],
+        }
+
+        if config["password"]:
+            connection["password"] = config["password"]
+
+        return AsyncRedisLocker(Aioredlock([connection], retry_count=1))
 
     raise ValueError(f"Unsupported cache locker {config['locker']}.")
