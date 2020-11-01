@@ -49,13 +49,14 @@ async def test_async_redis_locker_unlock():
 
 @patch("limberframework.cache.lockers.AsyncRedisLocker")
 @mark.asyncio
-async def test_make_locker(mock_asyncredislocker):
+async def test_make_locker_without_password(mock_asyncredislocker):
     config = {
         "locker": "asyncredis",
         "host": "localhost",
         "port": 1234,
         "db": 0,
         "password": None,
+        "locker_retry_count": 1,
     }
 
     await make_locker(config)
@@ -67,6 +68,36 @@ async def test_make_locker(mock_asyncredislocker):
                     "host": config["host"],
                     "port": config["port"],
                     "db": config["db"],
+                    "password": config["password"],
+                }
+            ],
+            retry_count=config["locker_retry_count"],
+        )
+    )
+
+
+@patch("limberframework.cache.lockers.AsyncRedisLocker")
+@mark.asyncio
+async def test_make_locker_with_password(mock_asyncredislocker):
+    config = {
+        "locker": "asyncredis",
+        "host": "localhost",
+        "port": 1234,
+        "db": 0,
+        "password": "test",
+        "locker_retry_count": 1,
+    }
+
+    await make_locker(config)
+
+    mock_asyncredislocker.assert_called_once_with(
+        Aioredlock(
+            [
+                {
+                    "host": config["host"],
+                    "port": config["port"],
+                    "db": config["db"],
+                    "password": config["password"],
                 }
             ],
             retry_count=1,

@@ -4,6 +4,7 @@ Classes:
 - Application: service container that registers and manages services.
 """
 from os import getcwd
+from os.path import join
 from typing import Any
 
 from fastapi import FastAPI
@@ -16,7 +17,7 @@ class Application(FastAPI):
     registering and managing services.
 
     Attributes:
-    base_path str -- system path to the application.
+    paths dict - paths to core parts of the application.
     _bindings dict -- services bound to the service container.
     _instances dict -- created instances of singleton services.
     """
@@ -27,7 +28,13 @@ class Application(FastAPI):
         Arguments:
         base_path str -- system path to the application.
         """
-        self.base_path = base_path or getcwd()
+        base_path = base_path or getcwd()
+
+        self.paths = {
+            "base": base_path,
+            "cache": join(base_path, "storage", "cache"),
+            "config": join(base_path, "config"),
+        }
         self._bindings = {}
         self._instances = {}
 

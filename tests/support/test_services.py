@@ -1,4 +1,3 @@
-from os import getcwd
 from unittest.mock import MagicMock, Mock, patch
 
 from pytest import fixture, mark
@@ -38,11 +37,14 @@ def app():
     "driver,connection",
     [("sqlite", SqliteConnection), ("pgsql", PostgresConnection)],
 )
+@patch("limberframework.config.config_service_provider.listdir")
 @patch("limberframework.database.connections.create_engine")
 @mark.asyncio
 async def test_database_service_provider_database_connection(
-    mock_create_engine, driver, connection, app
+    mock_create_engine, mock_list_dir, driver, connection, app
 ):
+    mock_list_dir.return_value = []
+
     config_service = await app.make("config")
     config_service["database"] = {
         "driver": driver,
@@ -61,8 +63,11 @@ async def test_database_service_provider_database_connection(
     assert isinstance(database, connection)
 
 
+@patch("limberframework.config.config_service_provider.listdir")
 @mark.asyncio
-async def test_database_service_provider_database_session(app):
+async def test_database_service_provider_database_session(mock_list_dir, app):
+    mock_list_dir.return_value = []
+
     config_service = await app.make("config")
     config_service["database"] = {
         "driver": "sqlite",
@@ -84,11 +89,40 @@ def test_config_service_provider():
     assert mock_app.bind.called_once()
 
 
+@patch("limberframework.config.config_service_provider.Config")
+@patch("limberframework.config.config_service_provider.isfile")
+@patch("limberframework.config.config_service_provider.listdir")
+@mark.asyncio
+async def test_config_service_provider_config_service(
+    mock_list_dir, mock_is_file, mock_config
+):
+    mock_list_dir.return_value = ["test.ini", "testing"]
+    mock_is_file.return_value = True
+
+    app = Application()
+    app.paths = {"base": "test_path", "config": "test_path/config"}
+
+    config_service_provider = ConfigServiceProvider()
+    config_service_provider.register(app)
+
+    config_service = await app.make("config")
+
+    assert config_service == mock_config.return_value
+    mock_config.return_value.read.assert_called_once_with(
+        "test_path/config/test.ini", encoding="utf-8"
+    )
+
+
 @mark.parametrize(
     "driver,authenticator", [("httpbasic", HttpBasic), ("apikey", ApiKey)]
 )
+@patch("limberframework.config.config_service_provider.listdir")
 @mark.asyncio
-async def test_authentication_service_provider(driver, authenticator, app):
+async def test_authentication_service_provider(
+    mock_list_dir, driver, authenticator, app
+):
+    mock_list_dir.return_value = []
+
     config_service = await app.make("config")
     config_service["auth"] = {"driver": driver}
     auth_service_provider = AuthServiceProvider()
@@ -99,28 +133,53 @@ async def test_authentication_service_provider(driver, authenticator, app):
     assert isinstance(auth, authenticator)
 
 
-@mark.parametrize(
-    "path,expected_path",
-    [("/", "/"), ("/tests", "/tests"), ("./tests", f"{getcwd()}/tests")],
-)
+@patch("limberframework.config.config_service_provider.listdir")
 @mark.asyncio
-async def test_cache_service_provider_cache_store(path, expected_path, app):
+async def test_cache_service_provider_cache_store(mock_list_dir, app):
+    mock_list_dir.return_value = []
+
     config_service = await app.make("config")
-    config_service["cache"] = {"driver": "file", "path": path}
+    config_service["cache"] = {"driver": "file"}
     cache_service_provider = CacheServiceProvider()
     cache_service_provider.register(app)
 
     store = await app.make("cache.store")
 
     assert isinstance(store, FileStore)
-    assert store.directory == expected_path
 
 
+@patch("limberframework.config.config_service_provider.listdir")
+@patch("limberframework.cache.cache_service_provider.make_store")
 @mark.asyncio
-async def test_cache_service_provider_cache(app):
+async def test_cache_service_provider_redis_store_without_password(
+    mock_make_store, mock_list_dir, app
+):
+    mock_list_dir.return_value = []
+
+    config_service = await app.make("config")
+    config_service["cache"] = {"driver": "redis"}
+    cache_service_provider = CacheServiceProvider()
+    cache_service_provider.register(app)
+
+    await app.make("cache.store")
+
+    mock_make_store.assert_called_once_with(
+        {"driver": "redis", "password": None}
+    )
+
+
+@patch("limberframework.config.config_service_provider.listdir")
+@mark.asyncio
+async def test_cache_service_provider_cache(mock_list_dir, app):
+    mock_list_dir.return_value = []
+
     path = "/tests"
     config_service = await app.make("config")
-    config_service["cache"] = {"driver": "file", "path": path, "locker": None}
+    config_service["cache"] = {
+        "driver": "file",
+        "path": path,
+        "locker": "None",
+    }
     cache_service_provider = CacheServiceProvider()
     cache_service_provider.register(app)
 
@@ -129,26 +188,44 @@ async def test_cache_service_provider_cache(app):
     assert isinstance(store, Cache)
 
 
+@patch("limberframework.config.config_service_provider.listdir")
 @patch("limberframework.cache.cache_service_provider.make_locker")
 @mark.asyncio
-async def test_cache_service_provider_cache_locker(mock_make_locker, app):
-    config = {
-        "driver": "asyncredis",
-        "host": "localhost",
-        "port": 6379,
-        "db": 0,
-        "password": None,
-        "locker": "asyncredis",
-    }
+async def test_cache_service_provider_cache_locker(
+    mock_make_locker, mock_list_dir, app
+):
+    mock_list_dir.return_value = []
+
     config_service = await app.make("config")
-    config_service["cache"] = config
+    config_service["cache"] = {"locker": "None"}
 
     cache_service_provider = CacheServiceProvider()
     cache_service_provider.register(app)
 
     await app.make("cache.locker")
 
-    mock_make_locker.assert_called_once_with(config)
+    mock_make_locker.assert_called_once_with({"locker": None})
+
+
+@patch("limberframework.config.config_service_provider.listdir")
+@patch("limberframework.cache.cache_service_provider.make_locker")
+@mark.asyncio
+async def test_cache_service_provider_locker_without_password(
+    mock_make_locker, mock_list_dir, app
+):
+    mock_list_dir.return_value = []
+
+    config_service = await app.make("config")
+    config_service["cache"] = {"locker": "asyncredis"}
+
+    cache_service_provider = CacheServiceProvider()
+    cache_service_provider.register(app)
+
+    await app.make("cache.locker")
+
+    mock_make_locker.assert_called_once_with(
+        {"locker": "asyncredis", "password": None}
+    )
 
 
 def test_create_service():

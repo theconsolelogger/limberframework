@@ -3,6 +3,9 @@
 Classes:
 - ConfigServiceProvider: Registers configuration services.
 """
+from os import listdir
+from os.path import isfile
+
 from limberframework.config.config import Config
 from limberframework.foundation.application import Application
 from limberframework.support.services import Service, ServiceProvider
@@ -29,6 +32,17 @@ class ConfigServiceProvider(ServiceProvider):
             Returns:
             Config -- Config object.
             """
-            return Config()
+            config = Config()
+            config.optionxform = str
+
+            for config_file in listdir(app.paths["config"]):
+                config_file_path = f"{app.paths['config']}/{config_file}"
+
+                if isfile(config_file_path) and config_file.lower().endswith(
+                    ".ini"
+                ):
+                    config.read(config_file_path, encoding="utf-8")
+
+            return config
 
         app.bind(Service("config", register_config, singleton=True))

@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Application.bind()` to accept a `Service` instance as an argument.
 - making of stores by moving the construction of a cache connection to the `make_store()` factory function.
 - making of lockers by moving the construction of a cache connection to the `make_locker()` factory function.
+- config service to a wrapper class around `ConfigParser` with helper functions to access configurations.
 
 ### Removed
 - `__getitem__()` from `Application` class as it no longer fits with the async capability of the class.

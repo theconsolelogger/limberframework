@@ -86,11 +86,11 @@ async def make_locker(config: Dict) -> Locker:
             "host": config["host"],
             "port": config["port"],
             "db": config["db"],
+            "password": config["password"],
         }
 
-        if config["password"]:
-            connection["password"] = config["password"]
-
-        return AsyncRedisLocker(Aioredlock([connection], retry_count=1))
+        return AsyncRedisLocker(
+            Aioredlock([connection], retry_count=config["locker_retry_count"])
+        )
 
     raise ValueError(f"Unsupported cache locker {config['locker']}.")

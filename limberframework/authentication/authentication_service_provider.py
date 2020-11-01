@@ -21,6 +21,7 @@ class AuthServiceProvider(ServiceProvider):
 
         async def register_authenticator(app: Application):
             config_service = await app.make("config")
-            return await make_authenticator(config_service["auth"])
+            config = config_service.get_section("auth")
+            return await make_authenticator(config)
 
         app.bind(Service("auth", register_authenticator, defer=True))

@@ -32,7 +32,8 @@ class DatabaseServiceProvider(ServiceProvider):
             Connection object
             """
             config_service = await app.make("config")
-            return await make_connection(config_service["database"])
+            config = config_service.get_section("database")
+            return await make_connection(config)
 
         app.bind(Service("db.connection", register_database_connection))
 

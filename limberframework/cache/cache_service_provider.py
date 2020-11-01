@@ -30,7 +30,16 @@ class CacheServiceProvider(ServiceProvider):
             Returns Store object.
             """
             config_service = await app.make("config")
-            return await make_store(config_service["cache"])
+            config = config_service.get_section("cache")
+
+            if config["driver"] == "file":
+                config["path"] = app.paths["cache"]
+            elif (
+                config["driver"] == "redis" or config["driver"] == "asyncredis"
+            ) and "password" not in config:
+                config["password"] = None
+
+            return await make_store(config)
 
         app.bind(Service("cache.store", register_store, singleton=True))
 
@@ -43,9 +52,13 @@ class CacheServiceProvider(ServiceProvider):
             Returns Locker.
             """
             config_service = await app.make("config")
+            config = config_service.get_section("cache")
+
+            if config["locker"] == "asyncredis" and "password" not in config:
+                config["password"] = None
 
             try:
-                return await make_locker(config_service["cache"])
+                return await make_locker(config)
             except ValueError:
                 return None
 
