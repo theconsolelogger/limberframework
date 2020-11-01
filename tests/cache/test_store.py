@@ -64,6 +64,19 @@ async def test_make_store_invalid_driver():
     )
 
 
+@mark.asyncio
+async def test_make_store_asyncredis_without_password():
+    config = {
+        "driver": "asyncredis",
+        "host": "localhost",
+        "port": 1234,
+        "db": 0,
+    }
+
+    with raises(KeyError, match="password"):
+        await make_store(config)
+
+
 @mark.parametrize(
     "directory,path",
     [
@@ -85,89 +98,96 @@ def test_file_store_path(directory, path):
 
 
 @patch("limberframework.cache.stores.FileSystem")
-def test_file_store_get(mock_file_system):
+@mark.asyncio
+async def test_file_store_get(mock_file_system):
     date = datetime.now() + timedelta(seconds=60)
     value = "test"
     content = date.isoformat() + "," + value
     mock_file_system.read_file.return_value = content
 
     file_store = FileStore("/test")
-    response = file_store.get("test")
+    response = await file_store.get("test")
 
     assert response == {"data": value, "expires_at": date}
 
 
 @patch("limberframework.cache.stores.FileSystem")
-def test_file_store_get_expired(mock_file_system):
+@mark.asyncio
+async def test_file_store_get_expired(mock_file_system):
     date = datetime.now() - timedelta(seconds=60)
     value = "test"
     content = date.isoformat() + "," + value
     mock_file_system.read_file.return_value = content
 
     file_store = FileStore("/test")
-    response = file_store.get("test")
+    response = await file_store.get("test")
 
     assert response == {"data": None, "expires_at": None}
 
 
 @patch("limberframework.cache.stores.FileSystem")
-def test_file_store_get_invalid_file(mock_file_system):
+@mark.asyncio
+async def test_file_store_get_invalid_file(mock_file_system):
     mock_file_system.read_file.side_effect = FileNotFoundError()
 
     file_store = FileStore("/test")
-    response = file_store.get("test")
+    response = await file_store.get("test")
 
     assert response == {"data": None, "expires_at": None}
 
 
 @patch("limberframework.cache.stores.FileSystem")
-def test_file_store_put(mock_file_system):
+@mark.asyncio
+async def test_file_store_put(mock_file_system):
     key = "test"
     value = "test"
     expires_at = datetime.now()
 
     file_store = FileStore("/test")
-    response = file_store.put(key, value, expires_at)
+    response = await file_store.put(key, value, expires_at)
 
     assert response
     mock_file_system.write_file.assert_called_once()
 
 
 @patch("limberframework.cache.stores.FileSystem")
-def test_file_store_add_invalid_file(mock_file_system):
+@mark.asyncio
+async def test_file_store_add_invalid_file(mock_file_system):
     mock_file_system.has_file.return_value = False
     key = "test"
     value = "test"
     expires_at = datetime.now()
 
     file_store = FileStore("/test")
-    response = file_store.add(key, value, expires_at)
+    response = await file_store.add(key, value, expires_at)
 
     assert response is False
 
 
 @patch("limberframework.cache.stores.FileSystem")
-def test_file_store_add(mock_file_system):
+@mark.asyncio
+async def test_file_store_add(mock_file_system):
     mock_file_system.has_file.return_value = True
     key = "test"
     value = "test"
     expires_at = datetime.now()
 
     file_store = FileStore("/test")
-    response = file_store.add(key, value, expires_at)
+    response = await file_store.add(key, value, expires_at)
 
     assert response
 
 
 @patch("limberframework.cache.stores.FileSystem")
-def test_file_store_get_item(mock_file_system):
+@mark.asyncio
+async def test_file_store_get_item(mock_file_system):
     date = datetime.now() - timedelta(seconds=60)
     value = "test"
     content = date.isoformat() + "," + value
     mock_file_system.read_file.return_value = content
 
     file_store = FileStore("/test")
-    response = file_store["test"]
+    response = await file_store["test"]
 
     assert response == {"data": None, "expires_at": None}
 
@@ -237,115 +257,120 @@ def test_payload(data, expires_at, payload):
     assert response == payload
 
 
-@patch("limberframework.cache.stores.Redis")
-def test_redis_store_get(mock_redis):
-    mock_redis.return_value.get.return_value = (
-        "2020-08-12T00:00:00,test".encode()
-    )
+@mark.asyncio
+async def test_redis_store_get():
+    mock_redis = Mock()
+    mock_redis.get.return_value = "2020-08-12T00:00:00,test".encode()
 
-    redis_store = RedisStore("localhost", 6379, 0, None)
-    response = redis_store.get("test")
+    redis_store = RedisStore(mock_redis)
+    response = await redis_store.get("test")
 
     assert response == {"data": "test", "expires_at": datetime(2020, 8, 12)}
 
 
 @patch("limberframework.cache.stores.datetime")
-@patch("limberframework.cache.stores.Redis")
-def test_redis_store_add(mock_redis, mock_datetime):
+@mark.asyncio
+async def test_redis_store_add(mock_datetime):
     key = "test"
     value = "test"
     expires_at = datetime(2020, 8, 12, 1)
     now = datetime(2020, 8, 12)
     ex = expires_at - now
-    mock_redis.return_value.set.return_value = True
+    mock_redis = Mock()
+    mock_redis.set.return_value = True
     mock_datetime.now.return_value = now
 
-    redis_store = RedisStore("localhost", 6379, 0, None)
-    response = redis_store.add(key, value, expires_at)
+    redis_store = RedisStore(mock_redis)
+    response = await redis_store.add(key, value, expires_at)
 
     assert response
-    mock_redis.return_value.set.assert_called_once_with(
+    mock_redis.set.assert_called_once_with(
         key, "2020-08-12T01:00:00,test", ex=ex, nx=True
     )
 
 
 @patch("limberframework.cache.stores.datetime")
-@patch("limberframework.cache.stores.Redis")
-def test_redis_store_put(mock_redis, mock_datetime):
+@mark.asyncio
+async def test_redis_store_put(mock_datetime):
     key = "test"
     value = "test"
     expires_at = datetime(2020, 8, 12, 1)
     now = datetime(2020, 8, 12)
     ex = expires_at - now
-    mock_redis.return_value.set.return_value = True
+    mock_redis = Mock()
+    mock_redis.set.return_value = True
     mock_datetime.now.return_value = now
 
-    redis_store = RedisStore("localhost", 6379, 0, None)
-    response = redis_store.put(key, value, expires_at)
+    redis_store = RedisStore(mock_redis)
+    response = await redis_store.put(key, value, expires_at)
 
     assert response
-    mock_redis.return_value.set.assert_called_once_with(
+    mock_redis.set.assert_called_once_with(
         key, "2020-08-12T01:00:00,test", ex=ex
     )
 
 
-@patch("limberframework.cache.stores.Client")
-def test_memcache_store_get(mock_memcache):
-    mock_memcache.return_value.get.return_value = (
-        "2020-08-12T00:00:00,test".encode()
-    )
+@mark.asyncio
+async def test_memcache_store_get():
+    mock_memcache = Mock()
+    mock_memcache.get.return_value = "2020-08-12T00:00:00,test".encode()
 
-    memcache_store = MemcacheStore("localhost", 11211)
-    response = memcache_store.get("test")
+    memcache_store = MemcacheStore(mock_memcache)
+    response = await memcache_store.get("test")
 
     assert response == {"data": "test", "expires_at": datetime(2020, 8, 12)}
 
 
 @patch("limberframework.cache.stores.datetime")
-@patch("limberframework.cache.stores.Client")
-def test_memcache_store_add(mock_memcache, mock_datetime):
+@mark.asyncio
+async def test_memcache_store_add(mock_datetime):
     key = "test"
     value = "test"
     expires_at = datetime(2020, 8, 12, 1)
     now = datetime(2020, 8, 12)
     expire = ceil((expires_at - now).total_seconds())
-    mock_memcache.return_value.get.return_value = None
-    mock_memcache.return_value.set.return_value = True
+    mock_memcache = Mock()
+    mock_memcache.get.return_value = None
+    mock_memcache.set.return_value = True
     mock_datetime.now.return_value = now
 
-    memcache_store = MemcacheStore("localhost", 11211)
-    response = memcache_store.add(key, value, expires_at)
+    memcache_store = MemcacheStore(mock_memcache)
+    response = await memcache_store.add(key, value, expires_at)
 
     assert response
-    mock_memcache.return_value.set.assert_called_once_with(
+    mock_memcache.set.assert_called_once_with(
         key, "2020-08-12T01:00:00,test", expire=expire
     )
 
 
-@patch("limberframework.cache.stores.Client")
-def test_memcache_store_add_existing(mock_memcache):
-    memcache_store = MemcacheStore("localhost", 11211)
-    response = memcache_store.add("test", "test", datetime(2020, 8, 12, 1))
+@mark.asyncio
+async def test_memcache_store_add_existing():
+    mock_memcache = Mock()
+    memcache_store = MemcacheStore(mock_memcache)
+    response = await memcache_store.add(
+        "test", "test", datetime(2020, 8, 12, 1)
+    )
 
     assert not response
 
 
 @patch("limberframework.cache.stores.datetime")
-@patch("limberframework.cache.stores.Client")
-def test_memcache_store_put(mock_memcache, mock_datetime):
+@mark.asyncio
+async def test_memcache_store_put(mock_datetime):
     key = "test"
     value = "test"
     expires_at = datetime(2020, 8, 12, 1)
     now = datetime(2020, 8, 12)
     expire = ceil((expires_at - now).total_seconds())
-    mock_memcache.return_value.set.return_value = True
+    mock_memcache = Mock()
+    mock_memcache.set.return_value = True
     mock_datetime.now.return_value = now
 
-    memcache_store = MemcacheStore("localhost", 11211)
-    response = memcache_store.put(key, value, expires_at)
+    memcache_store = MemcacheStore(mock_memcache)
+    response = await memcache_store.put(key, value, expires_at)
 
     assert response
-    mock_memcache.return_value.set.assert_called_once_with(
+    mock_memcache.set.assert_called_once_with(
         key, "2020-08-12T01:00:00,test", expire=expire
     )
 

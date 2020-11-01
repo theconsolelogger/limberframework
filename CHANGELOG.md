@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - the setting of an expire time for a resource in a Redis cache using `AsyncRedisStore`.
 - issues with mocking in test for checking the prevention of too many requests, `test_dispatch_too_many_requests_exception`.
 - `make_locker` raising `ValueError` for unknown locker.
+- improve documentation for the `Application` class.
+- ordering of parameters for `Application.__init__()`.
+- making services in `authentication.authenticators` modules to use `Application.make` method.
 
 ### Added
 - deferrable services which will be loaded when needed.
@@ -28,9 +31,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - AsyncRedisStore to support asynchronous Redis communication.
 - cache locker service to lock resources in the cache database, including the AsyncRedisLocker service.
 - tests for `locker` module.
+- `Service` class to represent a service that is required by the service container.
+- check for a used service name when attempting to bind a new service to the service container in `Application.bind()`.
 
 ### Changed
 - restructured tests to match project structure for consistency.
+- `Application` class to use the `Service` class when binding a service.
+- `Application.bind()` to check for instances of a singleton service without `.keys()`.
+- `Application` class bindings and instances private attributes.
+- `Application.bind()` to accept a `Service` instance as an argument.
+- making of stores by moving the construction of a cache connection to the `make_store()` factory function.
+- making of lockers by moving the construction of a cache connection to the `make_locker()` factory function.
+- config service to a wrapper class around `ConfigParser` with helper functions to access configurations.
+
+### Removed
+- `__getitem__()` from `Application` class as it no longer fits with the async capability of the class.
+- `register()` from `Application` class to simplify the registering of service providers with the service container.
 
 ## [0.1.1] - 2020-08-11
 ### Changed
@@ -69,6 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Database session to autocommit and autoflush.
 - Commit session to database after processing the request in the DatabaseSessionMiddleware.
 - Pipenv to poetry for package management and distribution.
+- Hasher class to a callable to hash a value rather than using the `hash()` method.
 
 ### Removed
 - Singleton metaclass as singletons are now handled by the Application class.

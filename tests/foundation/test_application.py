@@ -1,21 +1,14 @@
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 from pytest import fixture, mark, raises
 
 from limberframework.foundation.application import Application
+from limberframework.support.services import Service
 
 
 @fixture
 def application():
     return Application()
-
-
-def test_register_service_provider(application):
-    mock_service_provider = MagicMock()
-
-    application.register(mock_service_provider)
-
-    mock_service_provider.register.assert_called_once()
 
 
 def test_bind_service(application):
@@ -24,11 +17,29 @@ def test_bind_service(application):
     singleton = True
     defer = True
 
-    application.bind(name, mock_closure, singleton, defer)
+    application.bind(Service(name, mock_closure, singleton, defer))
 
-    assert application.bindings == {
-        name: {"closure": mock_closure, "singleton": singleton, "defer": defer}
+    assert application._bindings == {
+        name: Service(name, mock_closure, singleton, defer)
     }
+
+
+def test_binding_service_with_used_name(application):
+    """Test binding a service to the service container where
+    the name has already been used to bind another service.
+    """
+    name = "test"
+
+    application._bindings = {name: Mock()}
+
+    with raises(
+        ValueError,
+        match=(
+            f"A service with the name {name} has already "
+            f"be bound to the service container."
+        ),
+    ):
+        application.bind(Service(name, Mock()))
 
 
 @mark.asyncio
@@ -54,7 +65,7 @@ async def test_make_known_non_singleton_service(application):
     closure = AsyncMock(side_effect=return_closure)
     singleton = False
 
-    application.bind(name, closure, singleton)
+    application.bind(Service(name, closure, singleton=singleton))
     service_1 = await application.make(name)
     service_2 = await application.make(name)
 
@@ -69,7 +80,7 @@ async def test_make_known_singleton_service(application):
     closure = AsyncMock()
     singleton = True
 
-    application.bind(name, closure, singleton)
+    application.bind(Service(name, closure, singleton=singleton))
     service_1 = await application.make(name)
     service_2 = await application.make(name)
 
@@ -101,24 +112,14 @@ async def test_load_services(application):
 
     for service in services:
         application.bind(
-            service["name"],
-            service["closure"],
-            service["singleton"],
-            service["defer"],
+            Service(
+                service["name"],
+                service["closure"],
+                service["singleton"],
+                service["defer"],
+            )
         )
 
     await application.load_services()
 
     application.make.assert_called_once_with(services[0]["name"])
-
-
-@mark.asyncio
-async def test_get_item(application):
-    name = "test"
-    closure = AsyncMock()
-    singleton = True
-
-    application.bind(name, closure, singleton)
-    service = await application[name]
-
-    assert isinstance(service, AsyncMock)

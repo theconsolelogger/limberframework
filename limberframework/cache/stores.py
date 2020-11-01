@@ -24,7 +24,7 @@ class Store(metaclass=ABCMeta):
     """Base class for a store."""
 
     @abstractmethod
-    def get(self, key: str) -> Dict:
+    async def get(self, key: str) -> Dict:
         """Retrieve data from cache.
 
         Arguments:
@@ -34,7 +34,7 @@ class Store(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def add(self, key: str, value: str, expires_at: datetime) -> bool:
+    async def add(self, key: str, value: str, expires_at: datetime) -> bool:
         """Store data in cache if it does not already exist.
 
         Arguments:
@@ -46,7 +46,7 @@ class Store(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def put(self, key: str, value: str, expires_at: datetime) -> bool:
+    async def put(self, key: str, value: str, expires_at: datetime) -> bool:
         """Store data in cache, overriding any existing data.
 
         Arguments:
@@ -135,9 +135,9 @@ class FileStore(Store):
         str -- path to the cache file.
         """
         hasher = Hasher("sha1")
-        return self.directory + "/" + hasher.hash(key)
+        return self.directory + "/" + hasher(key)
 
-    def get(self, key: str) -> Dict:
+    async def get(self, key: str) -> Dict:
         """Retrieves stored data for a key.
 
         Arguments:
@@ -162,7 +162,7 @@ class FileStore(Store):
             decoded_contents["value"], decoded_contents["expires_at"]
         )
 
-    def add(self, key: str, value: str, expires_at: datetime) -> bool:
+    async def add(self, key: str, value: str, expires_at: datetime) -> bool:
         """Add data to cache storage if it does not already exist.
 
         Arguments:
@@ -177,9 +177,9 @@ class FileStore(Store):
         if not FileSystem.has_file(path):
             return False
 
-        return self.put(key, value, expires_at)
+        return await self.put(key, value, expires_at)
 
-    def put(self, key: str, value: str, expires_at: datetime) -> bool:
+    async def put(self, key: str, value: str, expires_at: datetime) -> bool:
         """Add data to cache storage, overriding any existing data.
 
         Arguments:
@@ -199,17 +199,17 @@ class FileStore(Store):
 
 
 class RedisStore(Store):
-    def __init__(self, host: str, port: int, db: int, password: str) -> None:
-        self.redis = Redis(host=host, port=port, db=db, password=password)
+    def __init__(self, redis: Redis) -> None:
+        self.redis = redis
 
-    def get(self, key: str) -> Dict:
+    async def get(self, key: str) -> Dict:
         contents = self.redis.get(key)
         return self.process(contents)
 
-    def add(self, key: str, value: str, expires_at: datetime) -> bool:
-        return self.put(key, value, expires_at, nx=True)
+    async def add(self, key: str, value: str, expires_at: datetime) -> bool:
+        return await self.put(key, value, expires_at, nx=True)
 
-    def put(
+    async def put(
         self, key: str, value: str, expires_at: datetime, **kwargs
     ) -> bool:
         contents = self.encode(value, expires_at)
@@ -247,22 +247,22 @@ class AsyncRedisStore(Store):
 
 
 class MemcacheStore(Store):
-    def __init__(self, host: str, port: str) -> None:
-        self.client = Client((host, port))
+    def __init__(self, client: Client) -> None:
+        self.client = client
 
-    def get(self, key: str) -> Dict:
+    async def get(self, key: str) -> Dict:
         contents = self.client.get(key)
         return self.process(contents)
 
-    def add(self, key: str, value: str, expires_at: datetime) -> bool:
+    async def add(self, key: str, value: str, expires_at: datetime) -> bool:
         contents = self.client.get(key)
 
         if contents:
             return False
 
-        return self.put(key, value, expires_at)
+        return await self.put(key, value, expires_at)
 
-    def put(self, key: str, value: str, expires_at: datetime) -> bool:
+    async def put(self, key: str, value: str, expires_at: datetime) -> bool:
         contents = self.encode(value, expires_at)
         number_seconds = ceil((expires_at - datetime.now()).total_seconds())
 
@@ -282,7 +282,12 @@ async def make_store(config: Dict) -> Store:
         return FileStore(config["path"])
     if config["driver"] == "redis":
         return RedisStore(
-            config["host"], config["port"], config["db"], config["password"]
+            Redis(
+                host=config["host"],
+                port=config["port"],
+                db=config["db"],
+                password=config["password"],
+            )
         )
     if config["driver"] == "asyncredis":
         redis = await create_redis(
@@ -292,6 +297,6 @@ async def make_store(config: Dict) -> Store:
         )
         return AsyncRedisStore(redis)
     if config["driver"] == "memcache":
-        return MemcacheStore(config["host"], config["port"])
+        return MemcacheStore(Client((config["host"], config["port"])))
 
     raise ValueError(f"Unsupported cache driver {config['driver']}.")

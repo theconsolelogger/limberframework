@@ -5,15 +5,23 @@ Classes:
 """
 from limberframework.authentication.authenticators import make_authenticator
 from limberframework.foundation.application import Application
-from limberframework.support.service_providers import ServiceProvider
+from limberframework.support.services import Service, ServiceProvider
 
 
 class AuthServiceProvider(ServiceProvider):
     """Registers database services to the service container."""
 
-    def register(self) -> None:
+    def register(self, app: Application) -> None:
+        """Registers the auth service with the application.
+
+        Arguments:
+        app limberframework.foundation.application.Application --
+        the service container.
+        """
+
         async def register_authenticator(app: Application):
             config_service = await app.make("config")
-            return await make_authenticator(config_service["auth"])
+            config = config_service.get_section("auth")
+            return await make_authenticator(config)
 
-        self.app.bind("auth", register_authenticator, defer=True)
+        app.bind(Service("auth", register_authenticator, defer=True))
