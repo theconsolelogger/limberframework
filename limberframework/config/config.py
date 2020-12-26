@@ -1,23 +1,24 @@
+"""Classes for accessing config settings."""
 from ast import literal_eval
 from configparser import ConfigParser
 from typing import Dict
 
 
 class Config(ConfigParser):
-    """Wrapper class for ConfigParser to provide
-    helper functions for accessing options in
+    """Wrapper class for ConfigParser.
+
+    Provides helper functions for accessing options in
     the configuration files.
     """
 
     def get_section(self, section: str) -> Dict:
-        """Retrieves a section from ConfigParser and
-        casts the options.
+        """Retrieve a section from ConfigParser and casts the options.
 
-        Arguments:
-        section str -- section to retrieve
+        Args:
+            section: Section to retrieve.
 
         Returns:
-        dict -- cast options for the section
+            dict: Cast options for the section.
         """
         section = self.__getitem__(section)
         options = {}

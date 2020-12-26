@@ -1,7 +1,6 @@
-"""Application
+"""Establishes the service container.
 
-Classes:
-- Application: service container that registers and manages services.
+The service container registers and manages services for the application.
 """
 from os import getcwd
 from os.path import join
@@ -13,20 +12,25 @@ from limberframework.support.services import Service
 
 
 class Application(FastAPI):
-    """The service container for the application,
-    registering and managing services.
+    """The service container for the application.
 
     Attributes:
-    paths dict - paths to core parts of the application.
-    _bindings dict -- services bound to the service container.
-    _instances dict -- created instances of singleton services.
+        paths: A dictionary containing paths to
+            core parts of the application.
+        _bindings: A dictionary containing services
+            bound to the service container.
+        _instances: A dictionary containing created
+            instances of singleton services.
+
+    Example:
+        app = Application(base_path=abspath("limber"))
     """
 
     def __init__(self, *args, base_path: str = None, **kwargs) -> None:
-        """Establishes the service container.
+        """Establish the service container and necessary paths.
 
-        Arguments:
-        base_path str -- system path to the application.
+        Args:
+            base_path: A string with the system path to the application.
         """
         base_path = base_path or getcwd()
 
@@ -41,11 +45,14 @@ class Application(FastAPI):
         super().__init__(*args, **kwargs)
 
     def bind(self, service: Service) -> None:
-        """Bind a service to the application.
+        """Bind a service to the service container.
 
-        Arguments:
-        service limberframework.support.services.Service --
-        the service to bind.
+        Args:
+            service: The Service to bind.
+
+        Raises:
+            ValueError: If the service name has already
+                been used to bind another service.
         """
         if service.name in self._bindings:
             raise ValueError(
@@ -56,15 +63,16 @@ class Application(FastAPI):
         self._bindings[service.name] = service
 
     async def make(self, name: str) -> Any:
-        """Create a new instance of a service, if the service
-        is marked as a singleton then any existing
+        """Create a new instance of a service.
+
+        If the service is marked as a singleton then any existing
         instance will be retuned.
 
-        Arguments:
-        name str -- name of the service.
+        Args:
+            name: A string of the service name.
 
         Returns:
-        Any -- an instance of the service.
+            The service, as returned by the Service closure.
         """
         try:
             binding = self._bindings[name]
@@ -74,16 +82,12 @@ class Application(FastAPI):
                 f"is bound to the service container."
             )
 
-        # If service is not a singleton, return a new instance.
         if not binding.singleton:
             return await self._bindings[name].closure(self)
 
-        # If an existing instance of the singleton
-        # service is available return it.
         if name in self._instances:
             return self._instances[name]
 
-        # Otherwise create a new instance and store it.
         self._instances[name] = await self._bindings[name].closure(self)
         return self._instances[name]
 
