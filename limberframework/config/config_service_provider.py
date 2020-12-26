@@ -1,8 +1,4 @@
-"""Config Service Provider
-
-Classes:
-- ConfigServiceProvider: Registers configuration services.
-"""
+"""Provides services for configuration."""
 from os import listdir
 from os.path import isfile
 
@@ -15,22 +11,22 @@ class ConfigServiceProvider(ServiceProvider):
     """Registers configuration services to the service container."""
 
     def register(self, app: Application) -> None:
-        """Registers the Config class to the service container,
-        which holds configuration settings for the application.
+        """Register the Config class to the service container.
 
-        Arguments:
-        app limberframework.foundation.application.Application --
-        the service container.
+        This service holds configuration settings for the application.
+
+        Args:
+            app: The Application.
         """
 
         async def register_config(app: Application) -> Config:
             """Closure for creating a new config service instance.
 
-            Arguments:
-            app Application -- Application object.
+            Args:
+                app: The Application.
 
             Returns:
-            Config -- Config object.
+                Config: Created Config instance.
             """
             config = Config()
             config.optionxform = str

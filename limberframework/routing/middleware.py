@@ -1,10 +1,4 @@
-"""Middleware
-
-Middleware relating to routing requests.
-
-Classes:
-- ThrottleRequestMiddleware: Enforces rate limits on clients.
-"""
+"""Middleware relating to routing requests."""
 from typing import Dict
 
 from fastapi import Request, Response
@@ -22,18 +16,18 @@ class ThrottleRequestMiddleware(BaseHTTPMiddleware):
     """Enforces rate limits on clients sending requests to the API.
 
     Attributes:
-    max_hits int -- number of allowed requests by a client.
-    decay int -- number of seconds the max_hits applies for.
+        max_hits: Number of allowed requests by a client.
+        decay: Number of seconds the max_hits applies for.
     """
 
     def __init__(
         self, *args, max_hits: int = 60, decay: int = 60, **kwargs
     ) -> None:
-        """Establishes the middleware.
+        """Establish the middleware.
 
-        Arguments:
-        max_hits int -- number of allowed requests by a client.
-        decay int -- number of seconds the max_hits applies for.
+        Args:
+            max_hits: Number of allowed requests by a client.
+            decay: Number of seconds the max_hits applies for.
         """
         self.max_hits = max_hits
         self.decay = decay
@@ -43,6 +37,20 @@ class ThrottleRequestMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
+        """Check a request against the rate limit.
+
+        Checks that a request is within the rate limit before processing.
+        If within the limit, the number of hits is updated.
+        Otherwise the request is terminated.
+        Additionally, rate limit information is added to the response.
+
+        Args:
+            request: The inbound request from a client.
+            call_next: The next callable to continue processing the request.
+
+        Returns:
+            Response: Response to the client request.
+        """
         response = Response("Internal server error", status_code=500)
 
         key = self.request_signature(request)
@@ -67,13 +75,15 @@ class ThrottleRequestMiddleware(BaseHTTPMiddleware):
         return response
 
     def request_signature(self, request: Request) -> str:
-        """Generates a unique identifier for
-        the client using the SHA1 algorithm.
+        """Generate a unique identifier for the client.
 
-        Arguments:
-        request Request -- a Request object.
+        Uses the SHA1 algorithm to generate the identifier.
 
-        Returns str.
+        Args:
+            request: A Request object.
+
+        Returns:
+            str: The unique identifier for the client.
         """
         key = str(request.base_url) + "|" + str(request.client.host)
         hasher = Hasher("sha1")
@@ -86,16 +96,17 @@ class ThrottleRequestMiddleware(BaseHTTPMiddleware):
         remaining_hits: int,
         available_in: int,
     ) -> Response:
-        """Adds rate limit headers to HTTP response.
+        """Add rate limit headers to HTTP response.
 
-        Arguments:
-        response Response -- a Response object.
-        max_hits int -- number of allowed requests by a client.
-        remaining_hits int --  number of unused allowed requests by a client.
-        available_in int -- number of seconds until the number of allowed
-        requests is refreshed.
+        Args:
+            response: A Response object.
+            max_hits: Number of allowed requests by a client.
+            remaining_hits: Number of unused allowed requests by a client.
+            available_in: Number of seconds until the number
+                of allowed requests is refreshed.
 
-        Returns Response.
+        Returns:
+            Response: Response to the client request.
         """
         headers = self.get_headers(max_hits, remaining_hits, available_in)
 
@@ -107,15 +118,16 @@ class ThrottleRequestMiddleware(BaseHTTPMiddleware):
     def get_headers(
         self, max_hits: int, remaining_hits: int, available_in: int = None
     ) -> Dict:
-        """Generates rate limit headers.
+        """Generate rate limit headers.
 
-        Arguments:
-        max_hits int -- number of allowed requests by a client.
-        remaining_hits int --  number of unused allowed requests by a client.
-        available_in int -- number of seconds until the number of allowed
-        requests is refreshed.
+        Args:
+            max_hits: Number of allowed requests by a client.
+            remaining_hits: Number of unused allowed requests by a client.
+            available_in: Number of seconds until the number
+                of allowed requests is refreshed.
 
-        Returns dict.
+        Returns:
+            dict: Dictionary containing the rate limit headers.
         """
         headers = {
             "X-RateLimit-Limit": str(max_hits),

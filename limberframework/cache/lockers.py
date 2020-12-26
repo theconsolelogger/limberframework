@@ -1,9 +1,4 @@
-"""Lockers
-
-Classes:
-- Locker: Abstract base class for lockers.
-- AsyncRedisLocker: Async locker for redis.
-"""
+"""Available Lockers to lock keys in the cache."""
 from abc import ABCMeta, abstractmethod
 from typing import Dict
 
@@ -14,38 +9,42 @@ class Locker(metaclass=ABCMeta):
     """Abstract base class for a locker.
 
     Attributes:
-    _locks dict -- list of set locks.
+        _locks: Dictionary of set locks.
     """
 
     def __init__(self):
-        """Establishes the set locks."""
+        """Establish the set locks."""
         self._locks = {}
 
     @abstractmethod
     def lock(self, key: str) -> None:
         """Locks a key in the store.
 
-        Arguments:
-        key str -- the key to lock.
+        Args:
+            key: The key to lock.
         """
 
     @abstractmethod
     def unlock(self, key: str) -> None:
         """Unlocks a key in the store.
 
-        Arguments:
-        key str -- the key to unlock.
+        Args:
+            key: The key to unlock.
         """
 
 
 class AsyncRedisLocker(Locker):
-    """Locker for a Redis database with an async connection."""
+    """Locker for a Redis database with an async connection.
+
+    Attributes:
+        lock_manager: mechanism used to lock keys in the cache.
+    """
 
     def __init__(self, lock_manager: Aioredlock) -> None:
-        """Establishes the connection to the Redis database.
+        """Establish the connection to the Redis database.
 
-        Arguments:
-        lock_manager aioredlock.Aioredlock -- an Aioredlock connection.
+        Args:
+            lock_manager: An Aioredlock connection.
         """
         self.lock_manager = lock_manager
 
@@ -54,9 +53,9 @@ class AsyncRedisLocker(Locker):
     async def lock(self, key: str, expires_in: int = 10) -> None:
         """Locks a key in the Redis database.
 
-        Arguments:
-        key str -- the key to lock.
-        expires_in int -- number of seconds the lock is valid for.
+        Args:
+            key: The key to lock.
+            expires_in: Number of seconds the lock is valid for.
         """
         lock = await self.lock_manager.lock(
             f"lock-{key}", lock_timeout=expires_in
@@ -66,20 +65,24 @@ class AsyncRedisLocker(Locker):
     async def unlock(self, key: str) -> None:
         """Unlocks a key in the Redis database.
 
-        Arguments:
-        key str -- the key to unlock.
+        Args:
+            key: The key to unlock.
         """
         lock = self._locks[key]
         await self.lock_manager.unlock(lock)
 
 
 async def make_locker(config: Dict) -> Locker:
-    """Factory function to create a locker.
+    """Create a locker.
 
-    Arguments:
-    config dict -- configuration settings for the locker.
+    Args:
+        config: Configuration settings for the locker.
 
-    Returns Locker object.
+    Returns:
+        The created Locker instance.
+
+    Raises:
+        ValueError: If the locker is not recognised in `config`.
     """
     if config["locker"] == "asyncredis":
         connection = {
