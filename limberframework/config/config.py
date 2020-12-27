@@ -1,46 +1,33 @@
-""" Config
-
-Classes:
-- BaseConfig: base class for configurations.
-- Config: holds configuration settings.
-"""
+"""Classes for accessing config settings."""
+from ast import literal_eval
+from configparser import ConfigParser
 from typing import Dict
-from pydantic import BaseSettings
 
-class BaseConfig(BaseSettings):
-    """Base class for configurations which
-    sets reading from a dotenv file.
+
+class Config(ConfigParser):
+    """Wrapper class for ConfigParser.
+
+    Provides helper functions for accessing options in
+    the configuration files.
     """
-    class Config:
-        env_file: str = ".env"
 
-class Config:
-    """Handles configuration settings for an application.
+    def get_section(self, section: str) -> Dict:
+        """Retrieve a section from ConfigParser and casts the options.
 
-    Attributes:
-    config dict -- the configuration settings.
-    """
-    def __init__(self) -> None:
-        """Establishes the initial configuration settings."""
-        self.config = {}
-
-    def __getitem__(self, name: str) -> Dict:
-        """Access a set of configuration
-        settings associated with a name.
-
-        Arguments:
-        name str -- name of configuration set.
+        Args:
+            section: Section to retrieve.
 
         Returns:
-        dict -- configuration settings.
+            dict: Cast options for the section.
         """
-        return self.config[name]
+        section = self.__getitem__(section)
+        options = {}
 
-    def __setitem__(self, name: str, config: Dict) -> None:
-        """Associate configuration settings with a name.
+        for option, value in section.items():
+            try:
+                value = literal_eval(value)
+            except (ValueError, SyntaxError):
+                pass
+            options[option] = value
 
-        Arguments:
-        name str -- name of configuration settings.
-        config dict -- configuration settings.
-        """
-        self.config[name] = config
+        return options

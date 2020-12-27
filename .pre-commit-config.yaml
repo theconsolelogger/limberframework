@@ -1,0 +1,26 @@
+repos:
+    - repo: https://github.com/PyCQA/isort
+      rev: 5.4.2
+      hooks:
+      -   id: isort
+    - repo: https://github.com/psf/black
+      rev: 20.8b1
+      hooks:
+        - id: black
+          language_version: python
+    - repo: https://gitlab.com/pycqa/flake8
+      rev: 3.8.3
+      hooks:
+        - id: flake8
+    - repo: local
+      hooks:
+        - id: pytest
+          name: pytest
+          entry: pytest
+          language: system
+          types: [python]
+          pass_filenames: false
+    - repo: https://github.com/pycqa/pydocstyle
+      rev: 5.1.1
+      hooks:
+        - id: pydocstyle

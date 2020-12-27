@@ -1,15 +1,27 @@
-"""Database Service Provider
-
-Classes:
-- DatabaseServiceProvider: Registers database services.
-"""
+"""Provides authentication services."""
 from limberframework.authentication.authenticators import make_authenticator
-from limberframework.support.service_providers import ServiceProvider
+from limberframework.foundation.application import Application
+from limberframework.support.services import Service, ServiceProvider
+
 
 class AuthServiceProvider(ServiceProvider):
-    """Registers database services to the service container."""
-    def register(self) -> None:
-        def register_authenticator(app: 'Application'):
-            return make_authenticator(app['config']['auth'])
+    """Register authentication services to the service container."""
 
-        self.app.bind('auth', register_authenticator)
+    def register(self, app: Application) -> None:
+        """Register the auth service with the application.
+
+        Args:
+            app: The Application.
+        """
+
+        async def register_authenticator(app: Application):
+            """Closure to create the auth service.
+
+            Args:
+                app: The Application.
+            """
+            config_service = await app.make("config")
+            config = config_service.get_section("auth")
+            return await make_authenticator(config)
+
+        app.bind(Service("auth", register_authenticator, defer=True))

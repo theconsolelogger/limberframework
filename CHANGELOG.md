@@ -6,6 +6,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2020-12-27
+### Fixed
+- test_make_store_file_store test to pass cache path inside the config dictionary.
+- circular import in support/service_provider between ServiceProvider and Application.
+- test_async_redis_add_key_does_not_exist to mock the expireat method with AsyncMock.
+- storing locks in a Locker by correcting the `_locks` attribute name in `AsyncRedisLocker`.
+- the passing of cache configuration settings from `make_locker()` to `AsyncRedisLocker`.
+- the setting of an expire time for a resource in a Redis cache using `AsyncRedisStore`.
+- issues with mocking in test for checking the prevention of too many requests, `test_dispatch_too_many_requests_exception`.
+- `make_locker` raising `ValueError` for unknown locker.
+- improve documentation for the `Application` class.
+- ordering of parameters for `Application.__init__()`.
+- making services in `authentication.authenticators` modules to use `Application.make` method.
+
+### Added
+- deferrable services which will be loaded when needed.
+- loading of services that are not deferrable so that they are ready for a request.
+- RedisStore and MemcacheStore to interact with a redis or memcache server and use to cache data.
+- Black code formatter to provide a consistent format for the project.
+- flake8 to enforce PEP8 styling.
+- pytest pre-commit hook to run tests before committing.
+- tests to authentication, database middleware, routing middleware, and service providers to increase test coverage to 100%.
+- isort pre-commit hook for consistent ordering of imports.
+- support for async services by Application.
+- AsyncRedisStore to support asynchronous Redis communication.
+- cache locker service to lock resources in the cache database, including the AsyncRedisLocker service.
+- tests for `locker` module.
+- `Service` class to represent a service that is required by the service container.
+- check for a used service name when attempting to bind a new service to the service container in `Application.bind()`.
+- sphinx to provide API documentation.
+- tox package to test project against multiple python versions and included python 3.9.0 support.
+
+### Changed
+- restructured tests to match project structure for consistency.
+- `Application` class to use the `Service` class when binding a service.
+- `Application.bind()` to check for instances of a singleton service without `.keys()`.
+- `Application` class bindings and instances private attributes.
+- `Application.bind()` to accept a `Service` instance as an argument.
+- making of stores by moving the construction of a cache connection to the `make_store()` factory function.
+- making of lockers by moving the construction of a cache connection to the `make_locker()` factory function.
+- config service to a wrapper class around `ConfigParser` with helper functions to access configurations.
+
+### Removed
+- `__getitem__()` from `Application` class as it no longer fits with the async capability of the class.
+- `register()` from `Application` class to simplify the registering of service providers with the service container.
+
 ## [0.1.1] - 2020-08-11
 ### Changed
 - psycopg2-binary package to psycopg2.
@@ -43,6 +89,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Database session to autocommit and autoflush.
 - Commit session to database after processing the request in the DatabaseSessionMiddleware.
 - Pipenv to poetry for package management and distribution.
+- Hasher class to a callable to hash a value rather than using the `hash()` method.
 
 ### Removed
 - Singleton metaclass as singletons are now handled by the Application class.

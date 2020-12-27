@@ -1,45 +1,79 @@
-"""Cache Service Provider
+"""Providers services related to the cache."""
+from typing import Optional
 
-Classes:
-- CacheServiceProvider: Registers cache services.
-"""
 from limberframework.cache.cache import Cache
-from limberframework.cache.stores import make_store, Store
-from limberframework.support.service_providers import ServiceProvider
+from limberframework.cache.lockers import Locker, make_locker
+from limberframework.cache.stores import Store, make_store
+from limberframework.foundation.application import Application
+from limberframework.support.services import Service, ServiceProvider
+
 
 class CacheServiceProvider(ServiceProvider):
-    """Registers cache services to the service container."""
-    def register(self):
-        """Registers the cache store to the service container."""
-        def register_store(app: 'Application') -> Store:
+    """Register cache services to the service container."""
+
+    def register(self, app: Application):
+        """Register the cache store to the service container.
+
+        Args:
+            app: The service container.
+        """
+
+        async def register_store(app: Application) -> Store:
             """Closure for establishing a cache store.
 
-            Arguments:
-            app Application -- foundation.application.Application object.
+            Args:
+                app: The Application.
 
-            Returns Store object.
+            Returns:
+                Store: The created Store.
             """
-            config = app['config']['cache']
+            config_service = await app.make("config")
+            config = config_service.get_section("cache")
 
-            # Check whether the cache path is a relative
-            # path, and construct the absolute path.
-            if app['config']['cache']['path'][0:1] is not '/':
-                config = app['config']['cache'].copy()
-                config['path'] = app.base_path + '/' + app['config']['cache']['path']
+            if config["driver"] == "file":
+                config["path"] = app.paths["cache"]
+            elif (
+                config["driver"] == "redis" or config["driver"] == "asyncredis"
+            ) and "password" not in config:
+                config["password"] = None
 
-            return make_store(config)
+            return await make_store(config)
 
-        self.app.bind('cache.store', register_store, True)
+        app.bind(Service("cache.store", register_store, singleton=True))
 
-        def register_cache(app: 'Application') -> Cache:
-            """Closure for establishing a
-            cache and linking to a store.
+        async def register_locker(app: Application) -> Optional[Locker]:
+            """Closure for establishing a locker.
 
-            Arguments:
-            app Application -- foundation.application.Application object.
+            Args:
+                app: The Application.
 
-            Returns Cache.
+            Returns
+                Locker: The created Locker.
             """
-            return Cache(app['cache.store'])
+            config_service = await app.make("config")
+            config = config_service.get_section("cache")
 
-        self.app.bind('cache', register_cache)
+            if config["locker"] == "asyncredis" and "password" not in config:
+                config["password"] = None
+
+            try:
+                return await make_locker(config)
+            except ValueError:
+                return None
+
+        app.bind(Service("cache.locker", register_locker, singleton=True))
+
+        async def register_cache(app: Application) -> Cache:
+            """Closure for establishing a cache and linking to a store.
+
+            Args:
+                app: The Application.
+
+            Returns:
+                Cache: The created Cache.
+            """
+            store = await app.make("cache.store")
+            locker = await app.make("cache.locker")
+            return Cache(store, locker)
+
+        app.bind(Service("cache", register_cache, defer=True))
