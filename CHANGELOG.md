@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.2.0] - 2020-12-27
 ### Fixed
 - test_make_store_file_store test to pass cache path inside the config dictionary.
 - circular import in support/service_provider between ServiceProvider and Application.
@@ -33,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - tests for `locker` module.
 - `Service` class to represent a service that is required by the service container.
 - check for a used service name when attempting to bind a new service to the service container in `Application.bind()`.
+- sphinx to provide API documentation.
+- tox package to test project against multiple python versions and included python 3.9.0 support.
 
 ### Changed
 - restructured tests to match project structure for consistency.

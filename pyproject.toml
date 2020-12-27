@@ -4,7 +4,7 @@ build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "limberframework"
-version = "0.1.1"
+version = "0.2.0"
 description = "The core of the Limber Framework, a python web application framework built using FastAPI."
 license = "MIT"
 authors = ["Jonathan Staniforth <jonathanstaniforth@gmail.com>"]
