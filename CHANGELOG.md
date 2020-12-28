@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - pre-commit to only pass files to pydocstyle from the _limberframework_ folder.
 
+### Fixed
+- missing package docstrings, i.e. in the \_\_init\_\_.py files, identified by pydocstyle.
+
 ## [0.2.0] - 2020-12-27
 ### Fixed
 - test_make_store_file_store test to pass cache path inside the config dictionary.
