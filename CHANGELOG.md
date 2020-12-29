@@ -5,8 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- coverage report pre-commit hook to check test coverage of the codebase.
+
 ### Changed
 - pre-commit to only pass files to pydocstyle from the _limberframework_ folder.
+- pytest pre-commit hook to use coverage so that a coverage report is generated.
 
 ### Fixed
 - missing package docstrings, i.e. in the \_\_init\_\_.py files, identified by pydocstyle.

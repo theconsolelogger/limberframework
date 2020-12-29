@@ -16,9 +16,15 @@ repos:
       hooks:
         - id: pytest
           name: pytest
-          entry: pytest
+          entry: coverage run --source limberframework -m pytest
           language: system
-          types: [python]
+          pass_filenames: false
+    - repo: local
+      hooks:
+        - id: coverage
+          name: coverage
+          entry: coverage report --fail-under=100
+          language: system
           pass_filenames: false
     - repo: https://github.com/pycqa/pydocstyle
       rev: 5.1.1
