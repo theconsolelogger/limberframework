@@ -25,10 +25,11 @@ class Connection(metaclass=ABCMeta):
         """Return the URL to for the database."""
 
 
-class PostgresConnection(Connection):
-    """Connection to a PostgreSQL database.
+class ServerConnection(Connection):
+    """Connection to a database located on a server.
 
     Attributes:
+        driver: Driver used to connect to the database.
         username: Username to connect to the database.
         password: Password to connect to the database.
         host: Name of the host with the database.
@@ -37,17 +38,25 @@ class PostgresConnection(Connection):
     """
 
     def __init__(
-        self, username: str, password: str, host: str, port: int, database: str
+        self,
+        driver: str,
+        username: str,
+        password: str,
+        host: str,
+        port: int,
+        database: str,
     ) -> None:
         """Establish the information needed to connect to the database.
 
         Args:
+            driver: Driver used to connect to the database.
             username: Username to connect to the database.
             password: Password to connect to the database.
             host: Name of the host with the database.
             port: Port to communicate with the database on the host.
             database: Name of the database.
         """
+        self.driver = driver
         self.username = username
         self.password = password
         self.host = host
@@ -59,7 +68,7 @@ class PostgresConnection(Connection):
     def get_url(self) -> str:
         """Return the URL to for the database."""
         return (
-            f"postgresql://{self.username}:{self.password}"
+            f"{self.driver}://{self.username}:{self.password}"
             f"@{self.host}:{self.port}/{self.database}"
         )
 
@@ -99,8 +108,9 @@ async def make_connection(config: Dict) -> Connection:
         ValueError: If the driver for the database
             in `config` is not recognised.
     """
-    if config["driver"] == "pgsql":
-        return PostgresConnection(
+    if config["driver"] in ["mysql+mysqldb", "postgresql"]:
+        return ServerConnection(
+            config["driver"],
             config["username"],
             config["password"],
             config["host"],

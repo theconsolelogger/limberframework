@@ -14,7 +14,7 @@ from limberframework.config.config_service_provider import (
     ConfigServiceProvider,
 )
 from limberframework.database.connections import (
-    PostgresConnection,
+    ServerConnection,
     SqliteConnection,
 )
 from limberframework.database.database_service_provider import (
@@ -35,7 +35,11 @@ def app():
 
 @mark.parametrize(
     "driver,connection",
-    [("sqlite", SqliteConnection), ("pgsql", PostgresConnection)],
+    [
+        ("sqlite", SqliteConnection),
+        ("postgresql", ServerConnection),
+        ("mysql+mysqldb", ServerConnection),
+    ],
 )
 @patch("limberframework.config.config_service_provider.listdir")
 @patch("limberframework.database.connections.create_engine")
