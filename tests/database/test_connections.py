@@ -2,10 +2,39 @@ from pytest import mark, raises
 from sqlalchemy.engine import Engine
 
 from limberframework.database.connections import (
+    ElasticsearchConnection,
     ServerConnection,
     SqliteConnection,
     make_connection,
 )
+
+
+@mark.parametrize(
+    "config",
+    [
+        {
+            "host": "localhost",
+            "port": 9200,
+            "path": "database-path",
+            "scheme": "http",
+        },
+        {
+            "host": "127.0.0.1",
+            "port": 5678,
+            "path": "test-path",
+            "scheme": "https",
+        },
+    ],
+)
+def test_elasticsearch_connection(config):
+    elasticsearch_connection = ElasticsearchConnection(**config)
+
+    assert isinstance(elasticsearch_connection, ElasticsearchConnection)
+    assert isinstance(elasticsearch_connection.engine, Engine)
+    assert elasticsearch_connection.host == config["host"]
+    assert elasticsearch_connection.port == config["port"]
+    assert elasticsearch_connection.path == config["path"]
+    assert elasticsearch_connection.scheme == config["scheme"]
 
 
 @mark.parametrize(
@@ -55,6 +84,37 @@ def test_sqlite_connection(path):
     assert isinstance(sqlite_connection, SqliteConnection)
     assert isinstance(sqlite_connection.engine, Engine)
     assert sqlite_connection.path == path
+
+
+@mark.parametrize(
+    "config,expected_url",
+    [
+        (
+            {
+                "host": "localhost",
+                "port": 9200,
+                "path": "database-path",
+                "scheme": "http",
+            },
+            "elasticsearch+http://localhost:9200/database-path",
+        ),
+        (
+            {
+                "host": "127.0.0.1",
+                "port": 5678,
+                "path": "test-path",
+                "scheme": "https",
+            },
+            "elasticsearch+https://127.0.0.1:5678/test-path",
+        ),
+    ],
+)
+def test_elasticsearch_connection_get_url(config, expected_url):
+    elasticsearch_connection = ElasticsearchConnection(**config)
+
+    url = elasticsearch_connection.get_url()
+
+    assert expected_url in url
 
 
 @mark.parametrize(
@@ -131,6 +191,16 @@ async def test_make_connection_with_invalid_driver():
 @mark.parametrize(
     "config,connection_class",
     [
+        (
+            {
+                "driver": "elasticsearch",
+                "host": "localhost",
+                "port": 9200,
+                "path": "database",
+                "scheme": "http",
+            },
+            ElasticsearchConnection,
+        ),
         (
             {
                 "driver": "mysql+mysqldb",
