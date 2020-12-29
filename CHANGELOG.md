@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - coverage report pre-commit hook to check test coverage of the codebase.
 - `limberframework.database.connections.ServerConnection` class to connect to databases located on a server.
 - mysql+mysqldb driver for connecting to a MySQL database.
+- `limberframework.database.connections.ElasticsearchConnection` class to connect to Elasticsearch databases.
 
 ### Changed
 - pre-commit to only pass files to pydocstyle from the _limberframework_ folder.

@@ -25,6 +25,33 @@ class Connection(metaclass=ABCMeta):
         """Return the URL to for the database."""
 
 
+class ElasticsearchConnection(Connection):
+    """Connection to an Elasticsearch database."""
+
+    def __init__(self, host: str, port: int, path: str, scheme: str):
+        """Establish the information needed to connect to the database.
+
+        Args:
+            host: Name of the host with the database.
+            port: Port to communicate with the database on the host.
+            path: Path to the database.
+            scheme: Scheme to use to connect to the database.
+        """
+        self.host = host
+        self.port = port
+        self.path = path
+        self.scheme = scheme
+
+        super().__init__()
+
+    def get_url(self) -> str:
+        """Return the URL to for the database."""
+        return (
+            f"elasticsearch+{self.scheme}://{self.host}:{self.port}"
+            f"/{self.path}"
+        )
+
+
 class ServerConnection(Connection):
     """Connection to a database located on a server.
 
@@ -108,6 +135,13 @@ async def make_connection(config: Dict) -> Connection:
         ValueError: If the driver for the database
             in `config` is not recognised.
     """
+    if config["driver"] == "elasticsearch":
+        return ElasticsearchConnection(
+            config["host"],
+            config["port"],
+            config["path"],
+            config["scheme"],
+        )
     if config["driver"] in ["mysql+mysqldb", "postgresql"]:
         return ServerConnection(
             config["driver"],
