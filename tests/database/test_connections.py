@@ -2,7 +2,7 @@ from pytest import mark, raises
 from sqlalchemy.engine import Engine
 
 from limberframework.database.connections import (
-    PostgresConnection,
+    ServerConnection,
     SqliteConnection,
     make_connection,
 )
@@ -13,6 +13,7 @@ from limberframework.database.connections import (
     [
         (
             {
+                "driver": "mysql+mysqldb",
                 "username": "root",
                 "password": "toor",
                 "host": "localhost",
@@ -22,6 +23,7 @@ from limberframework.database.connections import (
         ),
         (
             {
+                "driver": "postgresql",
                 "username": "admin",
                 "password": "pass1234",
                 "host": "postgres",
@@ -31,16 +33,17 @@ from limberframework.database.connections import (
         ),
     ],
 )
-def test_postgres_connection(config):
-    postgres_connection = PostgresConnection(**config)
+def test_server_connection(config):
+    server_connection = ServerConnection(**config)
 
-    assert isinstance(postgres_connection, PostgresConnection)
-    assert isinstance(postgres_connection.engine, Engine)
-    assert postgres_connection.username == config["username"]
-    assert postgres_connection.password == config["password"]
-    assert postgres_connection.host == config["host"]
-    assert postgres_connection.port == config["port"]
-    assert postgres_connection.database == config["database"]
+    assert isinstance(server_connection, ServerConnection)
+    assert isinstance(server_connection.engine, Engine)
+    assert server_connection.driver == config["driver"]
+    assert server_connection.username == config["username"]
+    assert server_connection.password == config["password"]
+    assert server_connection.host == config["host"]
+    assert server_connection.port == config["port"]
+    assert server_connection.database == config["database"]
 
 
 @mark.parametrize(
@@ -59,16 +62,18 @@ def test_sqlite_connection(path):
     [
         (
             {
+                "driver": "mysql+mysqldb",
                 "username": "root",
                 "password": "toor",
                 "host": "localhost",
                 "port": 5432,
                 "database": "public",
             },
-            "postgresql://root:toor@localhost:5432/public",
+            "mysql+mysqldb://root:toor@localhost:5432/public",
         ),
         (
             {
+                "driver": "postgresql",
                 "username": "admin",
                 "password": "pass1234",
                 "host": "postgres",
@@ -79,10 +84,10 @@ def test_sqlite_connection(path):
         ),
     ],
 )
-def test_pgsql_connection_get_url(config, expected_url):
-    postgres_connection = PostgresConnection(**config)
+def test_server_connection_get_url(config, expected_url):
+    server_connection = ServerConnection(**config)
 
-    url = postgres_connection.get_url()
+    url = server_connection.get_url()
 
     assert expected_url in url
 
@@ -123,17 +128,42 @@ async def test_make_connection_with_invalid_driver():
     assert f"Unsupported driver {config['driver']}" in str(exception.value)
 
 
+@mark.parametrize(
+    "config,connection_class",
+    [
+        (
+            {
+                "driver": "mysql+mysqldb",
+                "username": "root",
+                "password": "toor",
+                "host": "localhost",
+                "port": 5432,
+                "database": "public",
+            },
+            ServerConnection,
+        ),
+        (
+            {
+                "driver": "postgresql",
+                "username": "admin",
+                "password": "pass1234",
+                "host": "postgres",
+                "port": 2500,
+                "database": "test",
+            },
+            ServerConnection,
+        ),
+        (
+            {
+                "driver": "sqlite",
+                "path": "./sqlite.db",
+            },
+            SqliteConnection,
+        ),
+    ],
+)
 @mark.asyncio
-async def test_make_connection_pgsql():
-    config = {
-        "driver": "pgsql",
-        "username": "test",
-        "password": "test",
-        "host": "test",
-        "port": 5432,
-        "database": "test",
-    }
-
+async def test_make_connection(config, connection_class):
     response = await make_connection(config)
 
-    assert isinstance(response, PostgresConnection)
+    assert isinstance(response, connection_class)
