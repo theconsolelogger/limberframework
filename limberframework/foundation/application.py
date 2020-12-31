@@ -38,6 +38,7 @@ class Application(FastAPI):
             "base": base_path,
             "cache": join(base_path, "storage", "cache"),
             "config": join(base_path, "config"),
+            "log": join(base_path, "storage", "log"),
         }
         self._bindings = {}
         self._instances = {}

@@ -58,6 +58,7 @@ autodoc_mock_imports = [
     "aioredis",
     "aioredlock",
     "fastapi",
+    "loguru",
     "pymemcache",
     "redis",
     "sqlalchemy",

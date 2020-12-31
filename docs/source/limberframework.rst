@@ -14,6 +14,7 @@ Subpackages
    limberframework.filesystem
    limberframework.foundation
    limberframework.hashing
+   limberframework.logging
    limberframework.routing
    limberframework.support
 

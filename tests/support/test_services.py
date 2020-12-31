@@ -1,4 +1,6 @@
-from unittest.mock import MagicMock, Mock, patch
+import sys
+from os.path import join
+from unittest.mock import MagicMock, Mock, call, patch
 
 from pytest import fixture, mark
 from sqlalchemy.orm import Session
@@ -21,6 +23,7 @@ from limberframework.database.database_service_provider import (
     DatabaseServiceProvider,
 )
 from limberframework.foundation.application import Application
+from limberframework.logging.log_service_provider import LogServiceProvider
 from limberframework.support.services import Service
 
 
@@ -229,6 +232,40 @@ async def test_cache_service_provider_locker_without_password(
 
     mock_make_locker.assert_called_once_with(
         {"locker": "asyncredis", "password": None}
+    )
+
+
+@patch("limberframework.config.config_service_provider.listdir")
+@patch("limberframework.logging.log_service_provider.logger")
+@mark.asyncio
+async def test_log_service_provider(mock_logger, mock_list_dir, app):
+    config_service = await app.make("config")
+    config_service["log.stdout"] = {
+        "level": "INFO",
+        "format": "{time} {message}",
+    }
+    config_service["log.file"] = {
+        "level": "ERROR",
+        "format": "{time} {level} {message}",
+        "retention": "1 week",
+        "rotation": "5 days",
+    }
+
+    log_service_provider = LogServiceProvider()
+    log_service_provider.register(app)
+
+    logger = await app.make("log")
+
+    assert logger is mock_logger
+    mock_logger.assert_has_calls(
+        [
+            call.remove(),
+            call.add(sys.stdout, **config_service["log.stdout"]),
+            call.add(
+                join(app.paths["log"], f"{app.title}.log"),
+                **config_service["log.file"],
+            ),
+        ]
     )
 
 
